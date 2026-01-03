@@ -1,0 +1,113 @@
+############################
+# OS / IDE
+############################
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VS Code
+.vscode/
+!.vscode/extensions.json
+
+############################
+# Build / Publish
+############################
+
+bin/
+obj/
+out/
+publish/
+
+############################
+# Logs
+############################
+
+*.log
+
+############################
+# Rider / JetBrains
+############################
+
+.idea/
+*.iml
+
+############################
+# .NET tooling
+############################
+
+# dotnet tools
+.dotnet/
+
+############################
+# Entity Framework
+############################
+
+# Local DB
+*.mdf
+*.ldf
+
+############################
+# App settings (SECRETS)
+############################
+
+# NEVER commit real settings
+appsettings.Production.json
+appsettings.Staging.json
+appsettings.Development.json
+
+# Local overrides
+appsettings.Local.json
+
+############################
+# User secrets (local only)
+############################
+
+secrets.json
+
+############################
+# Certificates / Keys
+############################
+
+*.pfx
+*.pem
+*.key
+*.crt
+
+############################
+# Environment files
+############################
+
+.env
+.env.*
+!.env.example
+
+############################
+# Docker
+############################
+
+docker-compose.override.yml
+
+############################
+# Node (si tooling frontend)
+############################
+
+node_modules/
+
+############################
+# Misc
+############################
+
+*.tmp
+*.temp
