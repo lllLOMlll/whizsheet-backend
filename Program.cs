@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using Whizsheet.Api.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Controllers
@@ -16,6 +19,12 @@ builder.Services.AddCors(options =>
 			.AllowAnyHeader()
 			.AllowAnyMethod();
 	});
+});
+
+
+builder.Services.AddDbContext<WhizsheetDbContext>(options =>
+{
+	options.UseSqlServer(builder.Configuration.GetConnectionString("WhizsheetDb"));
 });
 
 var app = builder.Build();

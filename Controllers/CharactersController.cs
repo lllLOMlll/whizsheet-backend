@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Whizsheet.Api.Domain;
+using Whizsheet.Api.Infrastructure;
 
 namespace Whizsheet.Api.Controllers
 {
@@ -7,16 +9,19 @@ namespace Whizsheet.Api.Controllers
 	[Route("api/characters")]
 	public class CharactersController : ControllerBase
 	{
-		private static readonly List<Character> Characters =
-			[
-			new Character { Id = 1, Name = "Aragorn", Class = "Ranger", Hp = 35 },
-			new Character { Id = 2, Name = "Legolas", Class = "Archer", Hp = 27 }
-			];
+		private readonly WhizsheetDbContext _db;
+
+		public CharactersController(WhizsheetDbContext db)
+		{
+			_db = db;
+		}
+		
 
 		[HttpGet]
-		public IActionResult GetAll()
+		public async Task<IActionResult> GetAll()
 		{
-			return Ok(Characters);
+			var characters = await _db.Characters.ToListAsync();
+			return Ok(characters);
 		}
 	}
 }
