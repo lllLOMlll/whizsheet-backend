@@ -2,12 +2,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
 using Whizsheet.Api.Domain;
+using Whizsheet.Api.Dtos.Characters;
 using Whizsheet.Api.Infrastructure;
 
 namespace Whizsheet.Api.Controllers
 {
 	[ApiController]
-	[Route("api/characters")]
+	[Route("api/v1/characters")]
 	public class CharactersController : ControllerBase
 	{
 		private readonly WhizsheetDbContext _db;
@@ -21,21 +22,62 @@ namespace Whizsheet.Api.Controllers
 		[HttpGet]
 		public async Task<IActionResult> GetAll()
 		{
-			var characters = await _db.Characters.ToListAsync();
+			var characters = await _db.Characters
+				.Select(c => new CharacterDto
+				{
+					Id = c.Id,
+					Name = c.Name,
+					Class = c.Class,
+					Hp = c.Hp,
+				}).ToListAsync();
+
 			return Ok(characters);
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Create(Character character)
+		public async Task<IActionResult> Create(CreateCharacterDto dto)
 		{
+			var character = new Character
+			{
+				Name = dto.Name,
+				Class = dto.Class,
+				Hp = dto.Hp
+			};
+
 			_db.Characters.Add(character);
 			await _db.SaveChangesAsync();
 
-			return CreatedAtAction(
-				nameof(GetAll),
-				new { id = character.Id },
-				character
-				);
+			var result = new CharacterDto 
+			{ 
+				Id = character.Id,
+				Name = character.Name, 
+				Class = character.Class, 
+				Hp = character.Hp 
+			};
+
+			// Ici, un peu étrange
+			// On devrait lire la ligne comme cela:	
+			/*
+			“J’ai créé un character,
+			tu peux le retrouver via GET / api / characters /{ id},
+			et voici ses données.
+			*/
+			// Par contre, GetAll ne retourne pas la ressource créé. Je n'ai pas encore créé cette méthode
+			return CreatedAtAction(nameof(GetAll), new { id = character.Id }, result);
+		}
+
+		[HttpDelete("{id:int}")]
+		public async Task<IActionResult> Delete(int id)
+		{
+			var character = await _db.Characters.FindAsync(id);
+
+			if (character == null)
+				return NotFound();
+	
+			_db.Characters.Remove(character);
+			await _db.SaveChangesAsync();
+
+			return NoContent(); // 204
 		}
 	}
 }
