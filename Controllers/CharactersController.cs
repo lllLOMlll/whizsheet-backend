@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
+using System;
+using System.Text;
 using Whizsheet.Api.Domain;
 using Whizsheet.Api.Dtos.Characters;
 using Whizsheet.Api.Infrastructure;
@@ -17,7 +19,7 @@ namespace Whizsheet.Api.Controllers
 		{
 			_db = db;
 		}
-		
+
 
 		[HttpGet]
 		public async Task<IActionResult> GetAll()
@@ -47,48 +49,7 @@ namespace Whizsheet.Api.Controllers
 			_db.Characters.Add(character);
 			await _db.SaveChangesAsync();
 
-			var result = new CharacterDto 
-			{ 
-				Id = character.Id,
-				Name = character.Name, 
-				Class = character.Class, 
-				Hp = character.Hp 
-			};
-
-			// Ici, un peu étrange
-			// On devrait lire la ligne comme cela:	
-			/*
-			“J’ai créé un character,
-			tu peux le retrouver via GET / api / characters /{ id},
-			et voici ses données.
-			*/
-			// Par contre, GetAll ne retourne pas la ressource créé. Je n'ai pas encore créé cette méthode
-			return CreatedAtAction(nameof(GetAll), new { id = character.Id }, result);
-		}
-
-		[HttpDelete("{id:int}")]
-		public async Task<IActionResult> Delete(int id)
-		{
-			var character = await _db.Characters.FindAsync(id);
-
-			if (character == null)
-				return NotFound();
-	
-			_db.Characters.Remove(character);
-			await _db.SaveChangesAsync();
-
-			return NoContent(); // 204
-		}
-
-		[HttpGet("{id:int}")]
-		public async Task<IActionResult> GetById(int id)
-		{
-			var character = await _db.Characters.FindAsync(id);
-
-			if (character is null)
-				return NotFound();
-
-			var dto = new CharacterDto
+			var result = new CharacterDto
 			{
 				Id = character.Id,
 				Name = character.Name,
@@ -96,25 +57,68 @@ namespace Whizsheet.Api.Controllers
 				Hp = character.Hp
 			};
 
-			return Ok(dto);
+			/*
+			CreatedAtAction          « J’ai créé une nouvelle ressource.
+			nameof(GetAll)           Tu peux la récupérer avec CETTE action,
+			{ id = character.Id }    avec CES paramètres,
+			result                   et voici sa représentation. »
+			*/
+			return CreatedAtAction(
+				nameof(GetById),
+				new { id = character.Id },
+				result
+			);
 		}
 
-		[HttpPut("{id:int}")]
-		public async Task<IActionResult> Update(int id, UpdateCharacterDto dto)
-		{
-			var character = await _db.Characters.FindAsync(id);
+			[HttpDelete("{id:int}")]
+			public async Task<IActionResult> Delete(int id)
+			{
+				var character = await _db.Characters.FindAsync(id);
 
-			if (character is null)
-				return NotFound();
+				if (character == null)
+					return NotFound();
 
-			character.Name = dto.Name;
-			character.Class = dto.Class;
-			character.Hp = dto.Hp;
+				_db.Characters.Remove(character);
+				await _db.SaveChangesAsync();
 
-			await _db.SaveChangesAsync();
+				return NoContent(); // 204
+			}
 
-			return NoContent(); // 204
+			[HttpGet("{id:int}")]
+			public async Task<IActionResult> GetById(int id)
+			{
+				var character = await _db.Characters.FindAsync(id);
+
+				if (character is null)
+					return NotFound();
+
+				var dto = new CharacterDto
+				{
+					Id = character.Id,
+					Name = character.Name,
+					Class = character.Class,
+					Hp = character.Hp
+				};
+
+				return Ok(dto);
+			}
+
+			[HttpPut("{id:int}")]
+			public async Task<IActionResult> Update(int id, UpdateCharacterDto dto)
+			{
+				var character = await _db.Characters.FindAsync(id);
+
+				if (character is null)
+					return NotFound();
+
+				character.Name = dto.Name;
+				character.Class = dto.Class;
+				character.Hp = dto.Hp;
+
+				await _db.SaveChangesAsync();
+
+				return NoContent(); // 204
+			}
+
 		}
-
 	}
-}
