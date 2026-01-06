@@ -79,5 +79,42 @@ namespace Whizsheet.Api.Controllers
 
 			return NoContent(); // 204
 		}
+
+		[HttpGet("{id:int}")]
+		public async Task<IActionResult> GetById(int id)
+		{
+			var character = await _db.Characters.FindAsync(id);
+
+			if (character is null)
+				return NotFound();
+
+			var dto = new CharacterDto
+			{
+				Id = character.Id,
+				Name = character.Name,
+				Class = character.Class,
+				Hp = character.Hp
+			};
+
+			return Ok(dto);
+		}
+
+		[HttpPut("{id:int}")]
+		public async Task<IActionResult> Update(int id, UpdateCharacterDto dto)
+		{
+			var character = await _db.Characters.FindAsync(id);
+
+			if (character is null)
+				return NotFound();
+
+			character.Name = dto.Name;
+			character.Class = dto.Class;
+			character.Hp = dto.Hp;
+
+			await _db.SaveChangesAsync();
+
+			return NoContent(); // 204
+		}
+
 	}
 }
