@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Text;
 using Whizsheet.Api.Domain;
 using Whizsheet.Api.Dtos.Auth;
+using Whizsheet.Api.Email;
 
 [ApiController]
 [Route("api/v1/auth")]
@@ -14,15 +15,18 @@ public class AuthController : ControllerBase
 	private readonly UserManager<ApplicationUser> _userManager;
 	private readonly SignInManager<ApplicationUser> _signInManager;
 	private readonly IConfiguration _configuration;
+	private readonly IEmailSender _emailSender;
 
 	public AuthController(
 		UserManager<ApplicationUser> userManager,
 		SignInManager<ApplicationUser> signInManager,
-		IConfiguration configuration)
+		IConfiguration configuration,
+		IEmailSender emailSender)
 	{
 		_userManager = userManager;
 		_signInManager = signInManager;
 		_configuration = configuration;
+		_emailSender = emailSender;
 	}
 
 	// =========================
@@ -50,11 +54,26 @@ public class AuthController : ControllerBase
 		var confirmationLink =
 			$"http://localhost:4200/confirm-email?userId={user.Id}&token={Uri.EscapeDataString(token)}";
 
-		// TODO: envoyer l’email via IEmailSender
-		Console.WriteLine("CONFIRM EMAIL LINK:");
-		Console.WriteLine(confirmationLink);
+		await _emailSender.SendAsync(
+			user.Email!,
+			"Confirm your Whizsheet account",
+			$"""
+			<p>Welcome to <strong>Whizsheet</strong> 👋</p>
+			<p>Please confirm your email by clicking the link below:</p>
+			<p>
+				<a href="{confirmationLink}">
+					Confirm email
+				</a>
+			</p>
+			"""
+		);
 
-		return Ok("Registration successful. Check your email.");
+
+		return Ok(new
+		{
+			message = "Registration successful. Check your email."
+		});
+
 	}
 
 	// =========================
@@ -153,4 +172,122 @@ public class AuthController : ControllerBase
 
 		return new JwtSecurityTokenHandler().WriteToken(token);
 	}
+
+	// =========================
+	// RESEND CONFIRMATION EMAIL
+	// =========================
+
+	[HttpPost("resend-confirmation")]
+	public async Task<IActionResult> ResendConfirmationEmail(
+		[FromBody] ResendConfirmationRequest request)
+	{
+		var user = await _userManager.FindByEmailAsync(request.Email);
+
+		// ⚠️ IMPORTANT : ne jamais révéler si l’email existe
+		if (user == null)
+		{
+			return Ok();
+		}
+
+		if (user.EmailConfirmed)
+		{
+			return Ok();
+		}
+
+		var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+		var confirmationLink =
+			$"http://localhost:4200/confirm-email" +
+			$"?userId={user.Id}&token={Uri.EscapeDataString(token)}";
+
+		await _emailSender.SendAsync(
+				user.Email!,
+				"Confirm your Whizsheet account",
+				$"""
+			<p>You requested a new confirmation email.</p>
+			<p>
+				<a href="{confirmationLink}">
+					Confirm email
+				</a>
+			</p>
+			"""
+			);
+
+
+		return Ok();
+	}
+
+	// =========================
+	// GOOGLE LOGIN (START)
+	// =========================
+
+	[HttpGet("google")]
+	public IActionResult GoogleLogin()
+	{
+		var redirectUrl =
+			Url.Action(nameof(GoogleCallback), "Auth");
+
+		var properties = _signInManager
+			.ConfigureExternalAuthenticationProperties(
+				"Google",
+				redirectUrl
+			);
+
+		return Challenge(properties, "Google");
+	}
+
+	// =========================
+	// GOOGLE LOGIN (CALLBACK)
+	// =========================
+
+	[HttpGet("google-callback")]
+	public async Task<IActionResult> GoogleCallback()
+	{
+		var info = await _signInManager.GetExternalLoginInfoAsync();
+
+		if (info == null)
+		{
+			return Unauthorized("Google login failed");
+		}
+
+		var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+
+		if (email == null)
+		{
+			return Unauthorized("Email not provided by Google");
+		}
+
+		var user = await _userManager.FindByEmailAsync(email);
+
+		if (user == null)
+		{
+			user = new ApplicationUser
+			{
+				UserName = email,
+				Email = email,
+				EmailConfirmed = true
+			};
+
+			var result = await _userManager.CreateAsync(user);
+
+			if (!result.Succeeded)
+			{
+				return BadRequest(result.Errors);
+			}
+
+			await _userManager.AddLoginAsync(user, info);
+		}
+
+		var token = GenerateJwt(user);
+
+		// ⚠️ Redirection vers Angular avec JWT
+		var frontendUrl =
+			$"http://localhost:4200/login?token={token}";
+
+		return Redirect(frontendUrl);
+	}
+
+
+
+
 }

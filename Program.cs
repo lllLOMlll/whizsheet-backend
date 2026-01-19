@@ -1,12 +1,18 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Whizsheet.Api.Domain;
-using Whizsheet.Api.Infrastructure;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Whizsheet.Api.Domain;
+using Whizsheet.Api.Email;
+using Whizsheet.Api.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+var smtpUser = builder.Configuration["Email:Smtp:Username"];
+var smtpPass = builder.Configuration["Email:Smtp:Password"];
 
 // Controllers
 builder.Services.AddControllers();
@@ -84,6 +90,10 @@ builder.Services
 			builder.Configuration["Authentication:Google:ClientSecret"]!;
 	});
 
+builder.Services.Configure<SmtpSettings>(
+	builder.Configuration.GetSection("Email:Smtp"));
+
+builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 
 
 var app = builder.Build();
@@ -100,10 +110,10 @@ app.UseRouting();
 
 app.UseHttpsRedirection();
 
+app.UseCors("AngularDev");
+
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseCors("AngularDev");
 
 app.MapControllers();
 
