@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -51,8 +52,15 @@ public class AuthController : ControllerBase
 
 		var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
+		var encodedToken = WebEncoders.Base64UrlEncode(
+			Encoding.UTF8.GetBytes(token)
+		);
+
 		var confirmationLink =
-			$"http://localhost:4200/confirm-email?userId={user.Id}&token={Uri.EscapeDataString(token)}";
+		  $"http://localhost:4200/confirm-email" +
+		  $"?userId={user.Id}&token={encodedToken}";
+
+
 
 		await _emailSender.SendAsync(
 			user.Email!,
@@ -117,28 +125,30 @@ public class AuthController : ControllerBase
 	// =========================
 	// CONFIRM EMAIL
 	// =========================
-
 	[HttpGet("confirm-email")]
 	public async Task<IActionResult> ConfirmEmail(
 		[FromQuery] string userId,
 		[FromQuery] string token)
 	{
 		var user = await _userManager.FindByIdAsync(userId);
-
 		if (user == null)
-		{
-			return BadRequest("Invalid user");
-		}
+			return Ok(new { confirmed = false });
 
-		var result = await _userManager.ConfirmEmailAsync(user, token);
+		if (user.EmailConfirmed)
+			return Ok(new { confirmed = true });
 
-		if (!result.Succeeded)
-		{
-			return BadRequest("Invalid token");
-		}
+		var decodedToken = Encoding.UTF8.GetString(
+			WebEncoders.Base64UrlDecode(token)
+		);
 
-		return Ok("Email confirmed successfully");
+		var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+
+		return Ok(new { confirmed = result.Succeeded });
 	}
+
+
+
+
 
 	// =========================
 	// JWT GENERATION
@@ -195,10 +205,13 @@ public class AuthController : ControllerBase
 		}
 
 		var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+		var encodedToken = WebEncoders.Base64UrlEncode(
+			Encoding.UTF8.GetBytes(token)
+		);
 
 		var confirmationLink =
 			$"http://localhost:4200/confirm-email" +
-			$"?userId={user.Id}&token={Uri.EscapeDataString(token)}";
+			$"?userId={user.Id}&token={encodedToken}";
 
 		await _emailSender.SendAsync(
 				user.Email!,

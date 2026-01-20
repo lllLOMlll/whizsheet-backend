@@ -15,24 +15,29 @@ namespace Whizsheet.Api.Email
 
 		public async Task SendAsync(string to, string subject, string htmlBody)
 		{
-			// 🧨 FAIL FAST
+			// 🔍 Lecture via settings (PAS IConfiguration)
+			var host = _settings.Host;
+			var port = _settings.Port;
+			var username = _settings.Username;
+			var password = _settings.Password;
+			var from = _settings.From;
+
+			// 🧨 Fail fast
 			if (string.IsNullOrWhiteSpace(to))
 				throw new InvalidOperationException("SMTP 'to' address is empty");
 
-			if (string.IsNullOrWhiteSpace(_settings.From))
-				throw new InvalidOperationException("SMTP 'From' is empty");
-
-			if (string.IsNullOrWhiteSpace(_settings.Username))
+			if (string.IsNullOrWhiteSpace(username))
 				throw new InvalidOperationException("SMTP 'Username' is empty");
 
-			Console.WriteLine("📧 SMTP SEND START");
-			Console.WriteLine($"TO: {to}");
-			Console.WriteLine($"FROM: {_settings.From}");
-			Console.WriteLine($"HOST: {_settings.Host}:{_settings.Port}");
+			if (string.IsNullOrWhiteSpace(password))
+				throw new InvalidOperationException("SMTP 'Password' is empty");
+
+			if (string.IsNullOrWhiteSpace(from))
+				throw new InvalidOperationException("SMTP 'From' is empty");
 
 			using var message = new MailMessage
 			{
-				From = new MailAddress(_settings.From),
+				From = new MailAddress(from, "Whizsheet"),
 				Subject = subject,
 				Body = htmlBody,
 				IsBodyHtml = true
@@ -40,18 +45,13 @@ namespace Whizsheet.Api.Email
 
 			message.To.Add(to);
 
-			using var client = new SmtpClient(_settings.Host, _settings.Port)
+			using var client = new SmtpClient(host, port)
 			{
-				Credentials = new NetworkCredential(
-					_settings.Username,
-					_settings.Password
-				),
+				Credentials = new NetworkCredential(username, password),
 				EnableSsl = true
 			};
 
 			await client.SendMailAsync(message);
-
-			Console.WriteLine("✅ SMTP SEND SUCCESS");
 		}
 	}
 }

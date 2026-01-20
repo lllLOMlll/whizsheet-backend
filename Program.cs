@@ -93,6 +93,20 @@ builder.Services
 builder.Services.Configure<SmtpSettings>(
 	builder.Configuration.GetSection("Email:Smtp"));
 
+
+var smtpTest = builder.Configuration
+	.GetSection("Email:Smtp")
+	.Get<SmtpSettings>();
+Console.WriteLine("SMTP CONFIG CHECK:");
+Console.WriteLine($"Host: {smtpTest?.Host}");
+Console.WriteLine($"Port: {smtpTest?.Port}");
+Console.WriteLine($"Username: {smtpTest?.Username}");
+Console.WriteLine($"From: {smtpTest?.From}");
+
+Console.WriteLine("DB CONNECTION STRING CHECK:");
+Console.WriteLine(builder.Configuration.GetConnectionString("WhizsheetDb"));
+
+
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 
 

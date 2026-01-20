@@ -12,8 +12,8 @@ using Whizsheet.Api.Infrastructure;
 namespace Whizsheet.Api.Migrations
 {
     [DbContext(typeof(WhizsheetDbContext))]
-    [Migration("20260113232719_AddIdentity2")]
-    partial class AddIdentity2
+    [Migration("20260119130959_InitialIdentity")]
+    partial class InitialIdentity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
