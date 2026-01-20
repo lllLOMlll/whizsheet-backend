@@ -7,9 +7,12 @@ using Whizsheet.Api.Domain;
 using Whizsheet.Api.Dtos.Characters;
 using Whizsheet.Api.Infrastructure;
 using System.Security.Claims;
+using System.Runtime.InteropServices;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Whizsheet.Api.Controllers
 {
+	[Authorize]
 	[ApiController]
 	[Route("api/v1/characters")]
 	public class CharactersController : ControllerBase
