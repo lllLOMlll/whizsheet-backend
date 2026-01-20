@@ -6,6 +6,7 @@ using System.Text;
 using Whizsheet.Api.Domain;
 using Whizsheet.Api.Dtos.Characters;
 using Whizsheet.Api.Infrastructure;
+using System.Security.Claims;
 
 namespace Whizsheet.Api.Controllers
 {
@@ -24,7 +25,10 @@ namespace Whizsheet.Api.Controllers
 		[HttpGet]
 		public async Task<IActionResult> GetAll()
 		{
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+			
 			var characters = await _db.Characters
+				.Where(c => c.UserId == userId)
 				.Select(c => new CharacterDto
 				{
 					Id = c.Id,
@@ -39,11 +43,14 @@ namespace Whizsheet.Api.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Create(CreateCharacterDto dto)
 		{
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+			
 			var character = new Character
 			{
 				Name = dto.Name,
 				Class = dto.Class,
-				Hp = dto.Hp
+				Hp = dto.Hp,
+				UserId = userId
 			};
 
 			_db.Characters.Add(character);
