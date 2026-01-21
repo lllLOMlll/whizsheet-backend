@@ -47,6 +47,11 @@ namespace Whizsheet.Api.Controllers
 		public async Task<IActionResult> Create(CreateCharacterDto dto)
 		{
 			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+			if (userId == null)
+			{
+				return Unauthorized();
+			}
 			
 			var character = new Character
 			{

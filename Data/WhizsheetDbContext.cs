@@ -13,5 +13,16 @@ namespace Whizsheet.Api.Infrastructure
 		}
 
 		public DbSet<Character> Characters => Set<Character>();
+
+		protected override void OnModelCreating(ModelBuilder builder)
+		{
+			base.OnModelCreating(builder);
+
+			builder.Entity<Character>()
+				.HasOne(c => c.User)
+				.WithMany()
+				.HasForeignKey(c => c.UserId)
+				.IsRequired();
+		}
 	}
 }

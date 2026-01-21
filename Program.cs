@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
 using System.Text;
 using Whizsheet.Api.Domain;
 using Whizsheet.Api.Email;
@@ -17,9 +18,44 @@ var smtpPass = builder.Configuration["Email:Smtp:Password"];
 // Controllers
 builder.Services.AddControllers();
 
-// Swagger (Swashbuckle)
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddOpenApi(options =>
+{
+	options.AddDocumentTransformer(async (document, context, cancellationToken) =>
+	{
+		document.Components ??= new Microsoft.OpenApi.Models.OpenApiComponents();
+		document.Components.SecuritySchemes ??=
+			new Dictionary<string, Microsoft.OpenApi.Models.OpenApiSecurityScheme>();
+
+		document.Components.SecuritySchemes["Bearer"] =
+			new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+			{
+				Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+				Scheme = "bearer",
+				BearerFormat = "JWT"
+			};
+
+		document.SecurityRequirements.Add(
+			new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+			{
+				{
+					new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+					{
+						Reference = new Microsoft.OpenApi.Models.OpenApiReference
+						{
+							Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+							Id = "Bearer"
+						}
+					},
+					Array.Empty<string>()
+				}
+			});
+
+		await Task.CompletedTask;
+	});
+});
+
+
+
 
 builder.Services.AddCors(options =>
 {
@@ -116,8 +152,8 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-	app.UseSwagger();
-	app.UseSwaggerUI();
+	app.MapOpenApi();
+	app.MapScalarApiReference();
 }
 
 app.UseRouting();
