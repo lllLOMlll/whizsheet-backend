@@ -43,10 +43,22 @@ namespace Whizsheet.Api.Controllers
 		public async Task<IActionResult> Create(CreateCharacterDto dto)
 		{
 			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
+			
 			if (userId == null)
 			{
 				return Unauthorized();
+			}
+
+			var characterCount = await _db.Characters
+					.CountAsync(c => c.UserId == userId);
+
+			if (characterCount >= 5)
+			{
+				return BadRequest(new
+				{
+					error = "CHARACTER_LIMIT_REACHED",
+					message = "You can only create up to 2 characters."
+				});
 			}
 			
 			var character = new Character
