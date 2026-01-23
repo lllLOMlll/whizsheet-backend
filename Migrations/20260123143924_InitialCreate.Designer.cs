@@ -12,8 +12,8 @@ using Whizsheet.Api.Infrastructure;
 namespace Whizsheet.Api.Migrations
 {
     [DbContext(typeof(WhizsheetDbContext))]
-    [Migration("20260120124801_AddUserIdToCharacter")]
-    partial class AddUserIdToCharacter
+    [Migration("20260123143924_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -158,6 +158,43 @@ namespace Whizsheet.Api.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Whizsheet.Api.Domain.AbilityScores", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CharacterId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Charisma")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Constitution")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Dexterity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Intelligence")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Strength")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Wisdom")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId")
+                        .IsUnique();
+
+                    b.ToTable("AbilityScores");
+                });
+
             modelBuilder.Entity("Whizsheet.Api.Domain.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -244,9 +281,11 @@ namespace Whizsheet.Api.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Characters");
                 });
@@ -299,6 +338,34 @@ namespace Whizsheet.Api.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Whizsheet.Api.Domain.AbilityScores", b =>
+                {
+                    b.HasOne("Whizsheet.Api.Domain.Character", "Character")
+                        .WithOne("Statblock")
+                        .HasForeignKey("Whizsheet.Api.Domain.AbilityScores", "CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+                });
+
+            modelBuilder.Entity("Whizsheet.Api.Domain.Character", b =>
+                {
+                    b.HasOne("Whizsheet.Api.Domain.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Whizsheet.Api.Domain.Character", b =>
+                {
+                    b.Navigation("Statblock")
                         .IsRequired();
                 });
 #pragma warning restore 612, 618

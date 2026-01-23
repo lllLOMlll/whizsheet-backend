@@ -155,6 +155,43 @@ namespace Whizsheet.Api.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Whizsheet.Api.Domain.AbilityScores", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CharacterId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Charisma")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Constitution")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Dexterity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Intelligence")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Strength")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Wisdom")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId")
+                        .IsUnique();
+
+                    b.ToTable("AbilityScores");
+                });
+
             modelBuilder.Entity("Whizsheet.Api.Domain.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -301,6 +338,17 @@ namespace Whizsheet.Api.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Whizsheet.Api.Domain.AbilityScores", b =>
+                {
+                    b.HasOne("Whizsheet.Api.Domain.Character", "Character")
+                        .WithOne("AbilityScores")
+                        .HasForeignKey("Whizsheet.Api.Domain.AbilityScores", "CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+                });
+
             modelBuilder.Entity("Whizsheet.Api.Domain.Character", b =>
                 {
                     b.HasOne("Whizsheet.Api.Domain.ApplicationUser", "User")
@@ -310,6 +358,12 @@ namespace Whizsheet.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Whizsheet.Api.Domain.Character", b =>
+                {
+                    b.Navigation("AbilityScores")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

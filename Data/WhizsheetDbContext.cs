@@ -13,6 +13,7 @@ namespace Whizsheet.Api.Infrastructure
 		}
 
 		public DbSet<Character> Characters => Set<Character>();
+		public DbSet<AbilityScores> AbilityScores => Set<AbilityScores>(); 
 
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
@@ -23,6 +24,13 @@ namespace Whizsheet.Api.Infrastructure
 				.WithMany()
 				.HasForeignKey(c => c.UserId)
 				.IsRequired();
+
+			builder.Entity<Character>()
+				.HasOne(c => c.AbilityScores)
+				.WithOne(c => c.Character)
+				.HasForeignKey<AbilityScores>(s => s.CharacterId)
+				.IsRequired();
 		}
 	}
+
 }

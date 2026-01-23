@@ -1,13 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
-using System;
-using System.Text;
 using Whizsheet.Api.Domain;
 using Whizsheet.Api.Dtos.Characters;
 using Whizsheet.Api.Infrastructure;
 using System.Security.Claims;
-using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Whizsheet.Api.Controllers
@@ -71,13 +67,7 @@ namespace Whizsheet.Api.Controllers
 				Class = character.Class,
 				Hp = character.Hp
 			};
-
-			/*
-			CreatedAtAction          « J’ai créé une nouvelle ressource.
-			nameof(GetAll)           Tu peux la récupérer avec CETTE action,
-			{ id = character.Id }    avec CES paramètres,
-			result                   et voici sa représentation. »
-			*/
+		
 			return CreatedAtAction(
 				nameof(GetById),
 				new { id = character.Id },
