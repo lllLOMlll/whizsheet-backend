@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
-using System;
-using System.Text;
 using Whizsheet.Api.Domain;
 using Whizsheet.Api.Dtos.Characters;
 using Whizsheet.Api.Infrastructure;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Whizsheet.Api.Controllers
 {
+	[Authorize]
 	[ApiController]
 	[Route("api/v1/characters")]
 	public class CharactersController : ControllerBase
@@ -24,7 +24,10 @@ namespace Whizsheet.Api.Controllers
 		[HttpGet]
 		public async Task<IActionResult> GetAll()
 		{
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+			
 			var characters = await _db.Characters
+				.Where(c => c.UserId == userId)
 				.Select(c => new CharacterDto
 				{
 					Id = c.Id,
@@ -39,11 +42,31 @@ namespace Whizsheet.Api.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Create(CreateCharacterDto dto)
 		{
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+			
+			if (userId == null)
+			{
+				return Unauthorized();
+			}
+
+			var characterCount = await _db.Characters
+					.CountAsync(c => c.UserId == userId);
+
+			if (characterCount >= 5)
+			{
+				return BadRequest(new
+				{
+					error = "CHARACTER_LIMIT_REACHED",
+					message = "You can only create up to 2 characters."
+				});
+			}
+			
 			var character = new Character
 			{
 				Name = dto.Name,
 				Class = dto.Class,
-				Hp = dto.Hp
+				Hp = dto.Hp,
+				UserId = userId
 			};
 
 			_db.Characters.Add(character);
@@ -56,13 +79,7 @@ namespace Whizsheet.Api.Controllers
 				Class = character.Class,
 				Hp = character.Hp
 			};
-
-			/*
-			CreatedAtAction          « J’ai créé une nouvelle ressource.
-			nameof(GetAll)           Tu peux la récupérer avec CETTE action,
-			{ id = character.Id }    avec CES paramètres,
-			result                   et voici sa représentation. »
-			*/
+		
 			return CreatedAtAction(
 				nameof(GetById),
 				new { id = character.Id },

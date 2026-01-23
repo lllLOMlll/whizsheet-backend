@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Whizsheet.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialIdentity : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -48,21 +48,6 @@ namespace Whizsheet.Api.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Characters",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Class = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Hp = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Characters", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -171,6 +156,59 @@ namespace Whizsheet.Api.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Characters",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Class = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Hp = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Characters", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Characters_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AbilityScores",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Strength = table.Column<int>(type: "int", nullable: false),
+                    Dexterity = table.Column<int>(type: "int", nullable: false),
+                    Constitution = table.Column<int>(type: "int", nullable: false),
+                    Intelligence = table.Column<int>(type: "int", nullable: false),
+                    Wisdom = table.Column<int>(type: "int", nullable: false),
+                    Charisma = table.Column<int>(type: "int", nullable: false),
+                    CharacterId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AbilityScores", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AbilityScores_Characters_CharacterId",
+                        column: x => x.CharacterId,
+                        principalTable: "Characters",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AbilityScores_CharacterId",
+                table: "AbilityScores",
+                column: "CharacterId",
+                unique: true);
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -209,11 +247,19 @@ namespace Whizsheet.Api.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Characters_UserId",
+                table: "Characters",
+                column: "UserId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AbilityScores");
+
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
