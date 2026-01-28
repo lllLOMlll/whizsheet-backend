@@ -237,8 +237,13 @@ public class AuthController : ControllerBase
 	[HttpGet("google")]
 	public IActionResult GoogleLogin()
 	{
-		var redirectUrl =
-			Url.Action(nameof(GoogleCallback), "Auth");
+		var redirectUrl = Url.Action(
+			nameof(GoogleCallback),
+			"Auth",
+			values: null,
+			protocol: Request.Scheme
+		);
+
 
 		var properties = _signInManager
 			.ConfigureExternalAuthenticationProperties(
@@ -295,7 +300,7 @@ public class AuthController : ControllerBase
 
 		// ⚠️ Redirection vers Angular avec JWT
 		var frontendUrl =
-			$"http://localhost:4200/login?token={token}";
+			$"http://localhost:4200/auth-redirect?token={token}";
 
 		return Redirect(frontendUrl);
 	}
