@@ -59,10 +59,13 @@ builder.Services.AddOpenApi(options =>
 
 builder.Services.AddCors(options =>
 {
-	options.AddPolicy("AngularDev", policy =>
+	options.AddPolicy("Frontend", policy =>
 	{
 		policy
-			.WithOrigins("http://localhost:4200")
+			.WithOrigins(
+				"http://localhost:4200",
+				"https://witty-beach-06fab4a0f.2.azurestaticapps.net"
+				)
 			.AllowAnyHeader()
 			.AllowAnyMethod();
 	});
@@ -71,8 +74,16 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddDbContext<WhizsheetDbContext>(options =>
 {
-	options.UseSqlServer(builder.Configuration.GetConnectionString("WhizsheetDb"));
+	options.UseSqlServer(
+		builder.Configuration.GetConnectionString("WhizsheetDb"),
+		sql => sql.EnableRetryOnFailure(
+			maxRetryCount: 5,
+			maxRetryDelay: TimeSpan.FromSeconds(10),
+			errorNumbersToAdd: null
+		)
+	);
 });
+
 
 builder.Services
 	.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -157,10 +168,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseRouting();
+app.UseCors("Frontend");
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+	app.UseHttpsRedirection();
+}
 
-app.UseCors("AngularDev");
+
 
 app.UseAuthentication();
 app.UseAuthorization();

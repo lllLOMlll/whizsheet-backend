@@ -18,6 +18,10 @@ public class AuthController : ControllerBase
 	private readonly IConfiguration _configuration;
 	private readonly IEmailSender _emailSender;
 
+	private string FrontendBaseUrl =>
+	_configuration["Frontend:BaseUrl"]!.TrimEnd('/');
+
+
 	public AuthController(
 		UserManager<ApplicationUser> userManager,
 		SignInManager<ApplicationUser> signInManager,
@@ -57,8 +61,9 @@ public class AuthController : ControllerBase
 		);
 
 		var confirmationLink =
-		  $"http://localhost:4200/confirm-email" +
-		  $"?userId={user.Id}&token={encodedToken}";
+			$"{FrontendBaseUrl}/confirm-email" +
+			$"?userId={user.Id}&token={encodedToken}";
+
 
 
 
@@ -210,8 +215,9 @@ public class AuthController : ControllerBase
 		);
 
 		var confirmationLink =
-			$"http://localhost:4200/confirm-email" +
+			$"{FrontendBaseUrl}/confirm-email" +
 			$"?userId={user.Id}&token={encodedToken}";
+
 
 		await _emailSender.SendAsync(
 				user.Email!,
@@ -298,11 +304,11 @@ public class AuthController : ControllerBase
 
 		var token = GenerateJwt(user);
 
-		// ⚠️ Redirection vers Angular avec JWT
 		var frontendUrl =
-			$"http://localhost:4200/auth-redirect?token={token}";
+			$"{FrontendBaseUrl}/auth-redirect?token={token}";
 
 		return Redirect(frontendUrl);
+
 	}
 
 
