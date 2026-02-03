@@ -39,38 +39,86 @@ public class AuthController : ControllerBase
 	// =========================
 
 	[HttpPost("register")]
-	public async Task<IActionResult> Register(RegisterRequest request)
+	public async Task<IActionResult> Register([FromBody] RegisterRequest request)
 	{
-		var user = new ApplicationUser
-		{
-			UserName = request.Email,
-			Email = request.Email
-		};
+		Console.WriteLine("===== REGISTER START =====");
+		Console.WriteLine($"Email: {request.Email}");
 
-		var result = await _userManager.CreateAsync(user, request.Password);
+		ApplicationUser user;
 
-		if (!result.Succeeded)
+		try
 		{
-			return BadRequest(result.Errors);
+			user = new ApplicationUser
+			{
+				UserName = request.Email,
+				Email = request.Email
+			};
+
+			Console.WriteLine("Creating user in Identity...");
+
+			var createResult = await _userManager.CreateAsync(user, request.Password);
+
+			if (!createResult.Succeeded)
+			{
+				Console.WriteLine("❌ USER CREATION FAILED");
+
+				foreach (var error in createResult.Errors)
+				{
+					Console.WriteLine($"Identity error: {error.Code} - {error.Description}");
+				}
+
+				return BadRequest(createResult.Errors);
+			}
+
+			Console.WriteLine($"✅ USER CREATED. UserId = {user.Id}");
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine("🔥 EXCEPTION DURING USER CREATION");
+			Console.WriteLine(ex.GetType().FullName);
+			Console.WriteLine(ex.Message);
+			Console.WriteLine(ex.StackTrace);
+
+			throw;
 		}
 
-		var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+		string confirmationLink;
 
-		var encodedToken = WebEncoders.Base64UrlEncode(
-			Encoding.UTF8.GetBytes(token)
-		);
+		try
+		{
+			Console.WriteLine("Generating email confirmation token...");
 
-		var confirmationLink =
-			$"{FrontendBaseUrl}/confirm-email" +
-			$"?userId={user.Id}&token={encodedToken}";
+			var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
+			var encodedToken = WebEncoders.Base64UrlEncode(
+				Encoding.UTF8.GetBytes(token)
+			);
 
+			confirmationLink =
+				$"{FrontendBaseUrl}/confirm-email" +
+				$"?userId={user.Id}&token={encodedToken}";
 
+			Console.WriteLine("Confirmation link generated:");
+			Console.WriteLine(confirmationLink);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine("EXCEPTION DURING TOKEN GENERATION");
+			Console.WriteLine(ex.GetType().FullName);
+			Console.WriteLine(ex.Message);
+			Console.WriteLine(ex.StackTrace);
 
-		await _emailSender.SendAsync(
-			user.Email!,
-			"Confirm your Whizsheet account",
-			$"""
+			throw;
+		}
+
+		try
+		{
+			Console.WriteLine("Sending confirmation email...");
+
+			await _emailSender.SendAsync(
+				user.Email!,
+				"Confirm your Whizsheet account",
+				$"""
 			<p>Welcome to <strong>Whizsheet</strong> 👋</p>
 			<p>Please confirm your email by clicking the link below:</p>
 			<p>
@@ -79,15 +127,29 @@ public class AuthController : ControllerBase
 				</a>
 			</p>
 			"""
-		);
+			);
 
+			Console.WriteLine("✅ EMAIL SENT SUCCESSFULLY");
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine("SMTP EXCEPTION");
+			Console.WriteLine(ex.GetType().FullName);
+			Console.WriteLine(ex.Message);
+			Console.WriteLine(ex.StackTrace);
+
+			// ⚠️ IMPORTANT : on RELANCE pour voir le vrai 500
+			throw;
+		}
+
+		Console.WriteLine("===== REGISTER END =====");
 
 		return Ok(new
 		{
 			message = "Registration successful. Check your email."
 		});
-
 	}
+
 
 	// =========================
 	// LOGIN
