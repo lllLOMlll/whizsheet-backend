@@ -63,8 +63,9 @@ builder.Services.AddCors(options =>
 	{
 		policy
 			.WithOrigins(
+				"https://www.whizsheet.com",
 				"http://localhost:4200",
-				"https://witty-beach-06fab4a0f.2.azurestaticapps.net"
+				"https://witty-beach-06fab4a0f.2.azurestaticapps.net"				
 				)
 			.AllowAnyHeader()
 			.AllowAnyMethod();
