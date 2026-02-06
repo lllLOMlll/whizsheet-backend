@@ -31,8 +31,7 @@ namespace Whizsheet.Api.Controllers
 				.Select(c => new CharacterDto
 				{
 					Id = c.Id,
-					Name = c.Name,
-					Class = c.Class,
+					Name = c.Name,			
 					Hp = c.Hp,
 				}).ToListAsync();
 
@@ -63,8 +62,7 @@ namespace Whizsheet.Api.Controllers
 			
 			var character = new Character
 			{
-				Name = dto.Name,
-				Class = dto.Class,
+				Name = dto.Name,		
 				Hp = dto.Hp,
 				UserId = userId
 			};
@@ -76,7 +74,6 @@ namespace Whizsheet.Api.Controllers
 			{
 				Id = character.Id,
 				Name = character.Name,
-				Class = character.Class,
 				Hp = character.Hp
 			};
 		
@@ -113,7 +110,6 @@ namespace Whizsheet.Api.Controllers
 				{
 					Id = character.Id,
 					Name = character.Name,
-					Class = character.Class,
 					Hp = character.Hp
 				};
 
@@ -129,7 +125,6 @@ namespace Whizsheet.Api.Controllers
 					return NotFound();
 
 				character.Name = dto.Name;
-				character.Class = dto.Class;
 				character.Hp = dto.Hp;
 
 				await _db.SaveChangesAsync();
