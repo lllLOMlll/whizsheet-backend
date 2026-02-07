@@ -44,7 +44,12 @@ namespace Whizsheet.Api.Infrastructure
 
 			// CharacterClass constraints (métier)
 			builder.Entity<CharacterClass>()
-				.HasIndex(cc => new { cc.CharacterId, cc.ClassName })
+				.HasIndex(cc => new
+				{
+					cc.CharacterId,
+					cc.ClassType,
+					cc.CustomClassName
+				})
 				.IsUnique();
 
 		}
