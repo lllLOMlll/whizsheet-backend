@@ -10,21 +10,26 @@ namespace Whizsheet.Api.Domain
 		public int Hp { get; set; }
 
 
-		// COMPOSITION -> Classes linked to Character
+		// *****************************************
+		// COMPOSITION
+		//******************************************
+		// ABILITY SCORES
 		public AbilityScores AbilityScores { get; set; } = null!;
-
+		// CLASSES AND LEVEL
 		public List<CharacterClass> Classes { get; set; } = new();
+		public const int MaxTotalLevel = 100;
+		public int TotalLevel => Classes.Sum(c => c.Level);
 
+
+
+		// *****************************************
 		// FOREIGN KEY
-
+		// *****************************************
 		[ForeignKey(nameof(User))]
 		public string UserId { get; set; } = null!;
 		public ApplicationUser User { get; set; } = null!;
 
-
-		// METHOD
-		public int GetTotalLevel => Classes.Sum(c => c.Level);
-
+		
 
 
 	}

@@ -7,12 +7,16 @@ namespace Whizsheet.Api.Domain
 	public class CharacterClass
 	{
 		public int Id { get; set; }
-		[Range(1, 100)]
 		public CharacterClassType ClassType { get; set; }
 		// If class == Other -> CustomClassName
-		public string? CustomClassName { get; set; } ;
+		public string? CustomClassName { get; set; }
+		[Range(1, 100)]
+		public string DisplayName =>
+			 ClassType == CharacterClassType.Other
+				? CustomClassName!
+				: ClassType.ToString();
 		public int Level {  get; set; }
-		[Required]
+		
 		
 
 
@@ -21,11 +25,7 @@ namespace Whizsheet.Api.Domain
 	
 
 
-		public string DisplayName()
-		{
-			return ClassType == CharacterClassType.Other
-				? CustomClassName!
-				: ClassType.ToString();
-		}
+
+	
 	}
 }
