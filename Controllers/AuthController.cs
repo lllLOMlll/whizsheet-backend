@@ -225,11 +225,18 @@ public class AuthController : ControllerBase
 	{
 		var jwtSettings = _configuration.GetSection("Jwt");
 
-		var claims = new[]
-		{
-			new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-			new Claim(JwtRegisteredClaimNames.Email, user.Email!)
-		};
+	var claims = new List<Claim>
+	{
+		// Claim principal attendu par ASP.NET Identity
+		new Claim(ClaimTypes.NameIdentifier, user.Id),
+
+		// Claim standard JWT (interop, OAuth, OpenID)
+		new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+
+		// Email (utile côté frontend et logs)
+		new Claim(JwtRegisteredClaimNames.Email, user.Email!)
+	};
+
 
 		var key = new SymmetricSecurityKey(
 			Encoding.UTF8.GetBytes(jwtSettings["Key"]!)
