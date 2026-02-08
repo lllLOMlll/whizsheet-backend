@@ -16,6 +16,6 @@
 		Sorcerer = 11,
 		Warlock = 12,
 		Wizard = 13,
-		Other = 99
+		Other = 14
 	}
 }
