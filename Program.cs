@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Text;
+using System.Text.Json.Serialization;
 using Whizsheet.Api.Domain;
 using Whizsheet.Api.Email;
 using Whizsheet.Api.Infrastructure;
@@ -16,7 +17,14 @@ var smtpUser = builder.Configuration["Email:Smtp:Username"];
 var smtpPass = builder.Configuration["Email:Smtp:Password"];
 
 // Controllers
-builder.Services.AddControllers();
+builder.Services
+	.AddControllers()
+	.AddJsonOptions(options =>
+	{
+		options.JsonSerializerOptions.Converters.Add(
+			new JsonStringEnumConverter()
+		);
+	});
 
 builder.Services.AddOpenApi(options =>
 {

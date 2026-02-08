@@ -23,7 +23,9 @@ namespace Whizsheet.Api.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Create(int characterId, List<CreateCharacterClassDto> dtos)
+		public async Task<IActionResult> Create(
+			int characterId, 
+			[FromBody] List<CreateCharacterClassDto> dtos)
 		{
 			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
