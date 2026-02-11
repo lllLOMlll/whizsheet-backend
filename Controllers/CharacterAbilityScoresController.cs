@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.JSInterop.Infrastructure;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
 using Whizsheet.Api.Domain;
 using Whizsheet.Api.Dtos.AbilityScores;
@@ -79,6 +81,38 @@ namespace Whizsheet.Api.Controllers
 				result
 				);
 		}
+
+		[HttpPut]
+		public async Task<IActionResult> Update(
+			int characterId,
+			[FromBody] CreateAbilityScoresDto dto)
+		{
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+			if (userId == null) return Unauthorized();
+
+			var character = await _db.Characters
+				.Include(c => c.AbilityScores)
+				.FirstOrDefaultAsync(c => c.Id == characterId && c.UserId == userId);
+
+			if (character == null) return NotFound("Character not found");
+
+
+			character.AbilityScores.Strength = dto.Strength;
+			character.AbilityScores.Dexterity = dto.Dexterity;
+			character.AbilityScores.Constitution = dto.Constitution;
+			character.AbilityScores.Intelligence = dto.Intelligence;
+			character.AbilityScores.Wisdom = dto.Wisdom;
+			character.AbilityScores.Charisma = dto.Charisma;
+
+			await _db.SaveChangesAsync();
+
+			return NoContent();
+			// If I want to send some information back to my front-end -
+			// For example, if I need those data for StrengthModifier
+			// return Ok(updatedDto);
+		}
+
 
 		[HttpGet]
 		public async Task<IActionResult> Get(int characterId)
