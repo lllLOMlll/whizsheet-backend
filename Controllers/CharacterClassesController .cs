@@ -106,6 +106,61 @@ namespace Whizsheet.Api.Controllers
 
 		}
 
+		[HttpPut]
+		public async Task<IActionResult> Update(
+			int characterId,
+			[FromBody] List<CreateCharacterClassDto> dtos)
+		{
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+			if (userId == null) return Unauthorized();
+
+			var character = await _dbContext.Characters
+				.Include(c => c.Classes)
+				.FirstOrDefaultAsync(c => c.Id == characterId && c.UserId == userId);
+
+			if (character == null) return NotFound();
+
+			int totalLevel = 0;
+			foreach (var dto in dtos)
+			{
+				totalLevel += dto.Level;
+				if (totalLevel > Character.MaxTotalLevel)
+					return BadRequest($"The sum of all levels must be {Character.MaxTotalLevel} or under");
+
+				if (dto.ClassType == CharacterClassType.Other && string.IsNullOrWhiteSpace(dto.CustomClassName))
+					return BadRequest("CustomClassName is required when ClassType is Other.");
+			}
+
+			// 3. Mise à jour : On remplace l'ancienne liste par la nouvelle
+			// Entity Framework s'occupera de supprimer les anciennes entrées orphelines
+			_dbContext.CharacterClasses.RemoveRange(character.Classes);
+
+			var newClasses = dtos.Select(dto => new CharacterClass
+			{
+				ClassType = dto.ClassType,
+				CustomClassName = dto.ClassType == CharacterClassType.Other ? dto.CustomClassName?.Trim() : null,
+				Level = dto.Level,
+				CharacterId = characterId
+			}).ToList();
+
+			_dbContext.CharacterClasses.AddRange(newClasses);
+
+			await _dbContext.SaveChangesAsync();
+
+			// 4. Retourner la nouvelle liste
+			var resultDto = newClasses.Select(cc => new CharacterClassDto
+			{
+				Id = cc.Id,
+				ClassType = cc.ClassType,
+				Level = cc.Level,
+				CustomClassName = cc.CustomClassName,
+				DisplayName = cc.DisplayName // Si ton entité a cette logique
+			}).ToList();
+
+			return Ok(resultDto);
+		}
+
 		[HttpGet]
 		public async Task<IActionResult> GetAll(int characterId)
 		{
