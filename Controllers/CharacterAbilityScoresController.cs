@@ -107,10 +107,23 @@ namespace Whizsheet.Api.Controllers
 
 			await _db.SaveChangesAsync();
 
-			return NoContent();
-			// If I want to send some information back to my front-end -
-			// For example, if I need those data for StrengthModifier
-			// return Ok(updatedDto);
+			var updateDto = new UpdateAbilityScoresDto
+			{
+				Strength = character.AbilityScores.Strength,
+				StrengthModifier = character.AbilityScores.StrengthModifier,
+				Dexterity = character.AbilityScores.Dexterity,
+				DexterityModifier = character.AbilityScores.DexterityModifier,
+				Constitution = character.AbilityScores.Constitution,
+				ConstitutionModifier = character.AbilityScores.ConstitutionModifier,
+				Intelligence = character.AbilityScores.Intelligence,
+				IntelligenceModifer = character.AbilityScores.IntelligenceModifer,
+				Wisdom = character.AbilityScores.Wisdom,
+				WisdomModifier = character.AbilityScores.WisdomModifier,
+				Charisma = character.AbilityScores.Charisma,
+				CharismaModifier = character.AbilityScores.CharismaModifier,
+			};
+
+			return Ok(updateDto);
 		}
 
 
