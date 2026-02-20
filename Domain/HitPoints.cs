@@ -17,6 +17,7 @@ namespace Whizsheet.Api.Domain
 		{
 			TotalHitPoints = totalHp;
 			CurrentHitPoints = totalHp;
+			TemporaryHitPoints = 0;
 		}
 
 		public void TakeDamage(int amount)

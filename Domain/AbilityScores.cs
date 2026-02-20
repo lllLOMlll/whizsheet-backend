@@ -22,5 +22,23 @@ namespace Whizsheet.Api.Domain
 		public Character Character { get; set; } = null!;
 
 
+		private AbilityScores() { }
+		public AbilityScores(
+				int strength,
+				int dexterity,
+				int constitution,
+				int intelligence,
+				int wisdom,
+				int charisma)
+		{
+			Strength = strength;
+			Dexterity = dexterity;
+			Constitution = constitution;
+			Intelligence = intelligence;
+			Wisdom = wisdom;
+			Charisma = charisma;
+		}
+
+
 	}
 }

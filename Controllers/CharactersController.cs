@@ -58,12 +58,8 @@ namespace Whizsheet.Api.Controllers
 					message = "You can only create up to 2 characters."
 				});
 			}
-			
-			var character = new Character
-			{
-				Name = dto.Name,		
-				UserId = userId
-			};
+
+			var character = new Character(dto.Name, userId);
 
 			_db.Characters.Add(character);
 			await _db.SaveChangesAsync();

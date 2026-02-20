@@ -14,7 +14,7 @@ namespace Whizsheet.Api.Domain
 		// COMPOSITION
 		//******************************************
 		// ABILITY SCORES
-		public AbilityScores AbilityScores { get; set; } = null!;
+		public AbilityScores? AbilityScores { get; set; } = null!;
 		// CLASSES AND LEVEL
 		public List<CharacterClass> Classes { get; set; } = new();
 		public const int MaxTotalLevel = 100;
@@ -37,6 +37,54 @@ namespace Whizsheet.Api.Domain
 		[ForeignKey(nameof(User))]
 		public string UserId { get; set; } = null!;
 		public ApplicationUser User { get; set; } = null!;
+
+		private Character() { }
+
+		public Character(string name, string userId)
+		{
+			if (string.IsNullOrWhiteSpace(name))
+				throw new ArgumentException("Name is required.", nameof(name));
+
+			if (string.IsNullOrWhiteSpace(userId))
+				throw new ArgumentException("UserId is required.", nameof(userId));
+
+			Name = name;
+			UserId = userId;
+		}
+
+		// =========================
+		// FACTORY METHODS
+		// =========================
+		public void CreateHitPoints(int totalHp)
+		{
+			if (HitPoints != null)
+				throw new InvalidOperationException("HitPoints already exist.");
+
+			if (totalHp <= 0 || totalHp > MaxHp) 
+				throw new ArgumentOutOfRangeException(nameof(totalHp));
+
+			HitPoints = new HitPoints(totalHp);
+		}
+
+		public void CreateAbilityScores(
+		 int strength,
+		 int dexterity,
+		 int constitution,
+		 int intelligence,
+		 int wisdom,
+		 int charisma)
+		{
+			if (AbilityScores != null)
+				throw new InvalidOperationException("Ability scores already exist.");
+
+			AbilityScores = new AbilityScores(
+				strength,
+				dexterity,
+				constitution,
+				intelligence,
+				wisdom,
+				charisma);
+		}
 
 
 

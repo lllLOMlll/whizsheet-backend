@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.JSInterop.Infrastructure;
-using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
 using Whizsheet.Api.Domain;
 using Whizsheet.Api.Dtos.AbilityScores;
@@ -28,11 +26,8 @@ namespace Whizsheet.Api.Controllers
 		public async Task<IActionResult> Create(int characterId, CreateAbilityScoresDto dto)
 		{
 			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
 			if (userId == null)
-			{
 				return Unauthorized();
-			}
 
 			var character = await _db.Characters
 				.Include(c => c.AbilityScores)
@@ -41,46 +36,34 @@ namespace Whizsheet.Api.Controllers
 					c.UserId == userId);
 
 			if (character == null)
-			{
 				return NotFound();
-			}
 
 			if (character.AbilityScores != null)
-			{
-				return Conflict("Ability scores already exist for this character.");
-			}
+				return Conflict("Ability scores already exist.");
 
-			var abilityScores = new AbilityScores
-			{
-				Strength = dto.Strength,
-				Dexterity = dto.Dexterity,
-				Constitution = dto.Constitution,
-				Intelligence = dto.Intelligence,
-				Wisdom = dto.Wisdom,
-				Charisma = dto.Charisma,
-				CharacterId = characterId,
-			};
+			character.CreateAbilityScores(
+				dto.Strength,
+				dto.Dexterity,
+				dto.Constitution,
+				dto.Intelligence,
+				dto.Wisdom,
+				dto.Charisma);
 
-			_db.Add(abilityScores);
 			await _db.SaveChangesAsync();
 
-			var result = new AbilityScoresDto
-			{
-				Strength = abilityScores.Strength,
-				Dexterity = abilityScores.Dexterity,
-				Constitution = abilityScores.Constitution,
-				Intelligence= abilityScores.Intelligence,
-				Wisdom= abilityScores.Wisdom,	
-				Charisma= abilityScores.Charisma,		
-			};
-
-
-			return CreatedAtAction(
-				nameof(Get),
-				new { characterId = character.Id},
-				result
-				);
+			return CreatedAtAction(nameof(Get),
+				new { characterId },
+				new AbilityScoresDto
+				{
+					Strength = character.AbilityScores!.Strength,
+					Dexterity = character.AbilityScores.Dexterity,
+					Constitution = character.AbilityScores.Constitution,
+					Intelligence = character.AbilityScores.Intelligence,
+					Wisdom = character.AbilityScores.Wisdom,
+					Charisma = character.AbilityScores.Charisma
+				});
 		}
+
 
 		[HttpPut]
 		public async Task<IActionResult> Update(
