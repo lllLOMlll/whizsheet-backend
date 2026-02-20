@@ -31,7 +31,8 @@ namespace Whizsheet.Api.Controllers
 				.Select(c => new CharacterDto
 				{
 					Id = c.Id,
-					Name = c.Name,								
+					Name = c.Name,	
+					TotalHitPoints = c.HitPoints.TotalHitPoints
 				}).ToListAsync();
 
 			return Ok(characters);
@@ -55,7 +56,7 @@ namespace Whizsheet.Api.Controllers
 				return BadRequest(new
 				{
 					error = "CHARACTER_LIMIT_REACHED",
-					message = "You can only create up to 2 characters."
+					message = "You can only create up to 5 characters."
 				});
 			}
 
