@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using Whizsheet.Api.Domain;
+using Whizsheet.Api.Dtos.CharacterClasses;
 using Whizsheet.Api.Dtos.Characters;
 using Whizsheet.Api.Infrastructure;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Whizsheet.Api.Controllers
 {
@@ -25,15 +26,31 @@ namespace Whizsheet.Api.Controllers
 		public async Task<IActionResult> GetAll()
 		{
 			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-			
+
+			if (userId == null)
+			{
+				return Unauthorized();
+			}
+
 			var characters = await _db.Characters
 				.Where(c => c.UserId == userId)
 				.Select(c => new CharacterDto
 				{
 					Id = c.Id,
-					Name = c.Name,	
-					TotalHitPoints = c.HitPoints.TotalHitPoints
-				}).ToListAsync();
+					Name = c.Name,
+					TotalHitPoints = c.HitPoints.TotalHitPoints,			
+					CharacterClass = c.Classes
+						.OrderByDescending(cc => cc.Level)
+						.Select(cc => new CharacterClassDto
+					{
+						Id = cc.Id,
+						ClassType = cc.ClassType,
+						CustomClassName = cc.CustomClassName,
+						Level = cc.Level,
+						DisplayName = cc.DisplayName
+					}).ToList() 
+				})
+				.ToListAsync();
 
 			return Ok(characters);
 		}
