@@ -132,8 +132,6 @@ namespace Whizsheet.Api.Controllers
 					return BadRequest("CustomClassName is required when ClassType is Other.");
 			}
 
-			// 3. Mise à jour : On remplace l'ancienne liste par la nouvelle
-			// Entity Framework s'occupera de supprimer les anciennes entrées orphelines
 			_dbContext.CharacterClasses.RemoveRange(character.Classes);
 
 			var newClasses = dtos.Select(dto => new CharacterClass
@@ -148,14 +146,14 @@ namespace Whizsheet.Api.Controllers
 
 			await _dbContext.SaveChangesAsync();
 
-			// 4. Retourner la nouvelle liste
+		
 			var resultDto = newClasses.Select(cc => new CharacterClassDto
 			{
 				Id = cc.Id,
 				ClassType = cc.ClassType,
 				Level = cc.Level,
 				CustomClassName = cc.CustomClassName,
-				DisplayName = cc.DisplayName // Si ton entité a cette logique
+				DisplayName = cc.DisplayName 
 			}).ToList();
 
 			return Ok(resultDto);

@@ -80,7 +80,11 @@ namespace Whizsheet.Api.Controllers
 
 			if (character == null) return NotFound("Character not found");
 
-
+			if (character.AbilityScores == null)
+			{
+				return NotFound("Ability scores not found for this character");
+			}
+		
 			character.AbilityScores.Strength = dto.Strength;
 			character.AbilityScores.Dexterity = dto.Dexterity;
 			character.AbilityScores.Constitution = dto.Constitution;

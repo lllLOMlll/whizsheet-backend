@@ -98,5 +98,42 @@ namespace Whizsheet.Api.Controllers
 			
 			return Ok(characterHitPoints);
 		}
+
+		[HttpPut]
+		public async Task<IActionResult> Update(
+			int characterId,
+			[FromBody] HitPointsDto dto)
+
+		{
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+			if (userId == null) return Unauthorized();
+
+			var character = await _dbContext.Characters
+				.Include(c => c.HitPoints)
+				.FirstAsync(c => c.UserId == userId && c.Id == characterId);
+
+			if (character == null) 
+				return NotFound("Character not found");
+
+			if (character.HitPoints == null)
+				throw new InvalidOperationException("Character is in an invalid state: HitPoints missing.");
+
+			character.HitPoints.TotalHitPoints = dto.TotalHitPoints;
+			character.HitPoints.CurrentHitPoints = dto.CurrentHitPoints;
+			character.HitPoints.TemporaryHitPoints = dto.TemporaryHitPoints;
+
+			await _dbContext.SaveChangesAsync();
+
+			var updateHitPointDto = new HitPointsDto
+			{
+				TotalHitPoints = character.HitPoints.TotalHitPoints,
+				CurrentHitPoints = character.HitPoints.CurrentHitPoints,
+				TemporaryHitPoints = character.HitPoints.TemporaryHitPoints
+			};
+	
+
+			return Ok(updateHitPointDto);
+		}
 	}
 }
