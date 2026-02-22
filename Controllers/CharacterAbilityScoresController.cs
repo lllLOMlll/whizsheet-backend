@@ -103,7 +103,7 @@ namespace Whizsheet.Api.Controllers
 				Constitution = character.AbilityScores.Constitution,
 				ConstitutionModifier = character.AbilityScores.ConstitutionModifier,
 				Intelligence = character.AbilityScores.Intelligence,
-				IntelligenceModifer = character.AbilityScores.IntelligenceModifer,
+				IntelligenceModifer = character.AbilityScores.IntelligenceModifier,
 				Wisdom = character.AbilityScores.Wisdom,
 				WisdomModifier = character.AbilityScores.WisdomModifier,
 				Charisma = character.AbilityScores.Charisma,

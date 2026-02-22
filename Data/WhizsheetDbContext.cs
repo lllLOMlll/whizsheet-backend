@@ -17,6 +17,7 @@ namespace Whizsheet.Api.Infrastructure
 		public DbSet<CharacterClass> CharacterClasses => Set<CharacterClass>();
 		public DbSet<HitPoints> HitPoints => Set<HitPoints>();
 		public DbSet<HitDicePool> HitDicePools => Set<HitDicePool>();
+		public DbSet<Skill> Skills => Set<Skill>();
 
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
@@ -34,6 +35,13 @@ namespace Whizsheet.Api.Infrastructure
 				.HasOne(character => character.AbilityScores)
 				.WithOne(scores => scores.Character)
 				.HasForeignKey<AbilityScores>(scores => scores.CharacterId)
+				.OnDelete(DeleteBehavior.Cascade)
+				.IsRequired();
+
+			builder.Entity<Character>()
+				.HasOne(c => c.Skills)
+				.WithOne(s => s.Character)
+				.HasForeignKey<Skill>(s => s.CharacterId)
 				.OnDelete(DeleteBehavior.Cascade)
 				.IsRequired();
 

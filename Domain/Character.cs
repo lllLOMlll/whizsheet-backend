@@ -9,22 +9,39 @@ namespace Whizsheet.Api.Domain
 		public int Id { get; set; }
 		public string Name { get; set; } = string.Empty;
 
+		public int ProficiencyBonus
+		{
+			get
+			{
+				if (TotalLevel <= 0)
+					return 2;
+
+				return 2 + ((TotalLevel - 1) / 4);
+			}
+		}
+
 
 		// *****************************************
 		// COMPOSITION
 		//******************************************
 		// ABILITY SCORES
-		public AbilityScores? AbilityScores { get; set; } = null!;
+		public AbilityScores AbilityScores { get; set; } = null!;
+
 		// CLASSES AND LEVEL
 		public List<CharacterClass> Classes { get; set; } = new();
 		public const int MaxTotalLevel = 100;
 		public int TotalLevel => Classes.Sum(c => c.Level);
+		
 		// HIT POINTS
 		public HitPoints HitPoints { get; set; } = null!;
 		public const int MaxHp = 999;
+		
 		// HIT DICE POOL
 		public IReadOnlyCollection<HitDicePool> HitDicePools => _hitDicePools;
 		private readonly List<HitDicePool> _hitDicePools = new();
+
+		// SKILLS
+		public Skill Skills { get; set; } = null!;
 
 
 
@@ -86,8 +103,15 @@ namespace Whizsheet.Api.Domain
 				charisma);
 		}
 
+		public void CreateSkills()
+		{
+			if (Skills != null)
+				throw new InvalidOperationException("Skills already exist");
+			Skills = new Skill(false);
+		}
 
-
+			
+	
 
 		public void SyncHitDicePools()
 		{
