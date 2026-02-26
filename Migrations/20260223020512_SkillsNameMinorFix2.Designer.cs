@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Whizsheet.Api.Infrastructure;
 
@@ -11,9 +12,11 @@ using Whizsheet.Api.Infrastructure;
 namespace Whizsheet.Api.Migrations
 {
     [DbContext(typeof(WhizsheetDbContext))]
-    partial class WhizsheetDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260223020512_SkillsNameMinorFix2")]
+    partial class SkillsNameMinorFix2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -375,15 +378,64 @@ namespace Whizsheet.Api.Migrations
                     b.Property<int>("CharacterId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("IsProficient")
+                    b.Property<bool>("isAcrobaticsProficient")
                         .HasColumnType("bit");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
+                    b.Property<bool>("isAnimalHandlingProficient")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("isArcanaProficient")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("isAthleticsProficient")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("isDeceptionProficient")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("isHistoryProficient")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("isInsightProficient")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("isIntimidationProficient")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("isInvestigationProficient")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("isMedecineProficient")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("isNatureProficient")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("isPerceptionProficient")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("isPerformanceProficient")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("isPersuasionProficient")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("isReligionProficient")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("isSleighOfHandProficient")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("isStealthProficient")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("isSurvivalProficient")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CharacterId");
+                    b.HasIndex("CharacterId")
+                        .IsUnique();
 
                     b.ToTable("Skills");
                 });
@@ -497,8 +549,8 @@ namespace Whizsheet.Api.Migrations
             modelBuilder.Entity("Whizsheet.Api.Domain.Skill", b =>
                 {
                     b.HasOne("Whizsheet.Api.Domain.Character", "Character")
-                        .WithMany("Skills")
-                        .HasForeignKey("CharacterId")
+                        .WithOne("Skills")
+                        .HasForeignKey("Whizsheet.Api.Domain.Skill", "CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -517,7 +569,8 @@ namespace Whizsheet.Api.Migrations
                     b.Navigation("HitPoints")
                         .IsRequired();
 
-                    b.Navigation("Skills");
+                    b.Navigation("Skills")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

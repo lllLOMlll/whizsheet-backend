@@ -39,11 +39,11 @@ namespace Whizsheet.Api.Infrastructure
 				.IsRequired();
 
 			builder.Entity<Character>()
-				.HasOne(c => c.Skills)
+				.HasMany(c => c.Skills)
 				.WithOne(s => s.Character)
-				.HasForeignKey<Skill>(s => s.CharacterId)
-				.OnDelete(DeleteBehavior.Cascade)
-				.IsRequired();
+				.HasForeignKey(s => s.CharacterId)
+				.OnDelete(DeleteBehavior.Cascade);
+
 
 			// Character → CharacterClass (1–N)
 			builder.Entity<Character>()

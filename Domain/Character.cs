@@ -1,6 +1,7 @@
 ﻿using Microsoft.Identity.Client;
 using System.ComponentModel.DataAnnotations.Schema;
 using Whizsheet.Api.Domain.Extensions;
+using Whizsheet.Api.Enum;
 
 namespace Whizsheet.Api.Domain
 {
@@ -31,17 +32,17 @@ namespace Whizsheet.Api.Domain
 		public List<CharacterClass> Classes { get; set; } = new();
 		public const int MaxTotalLevel = 100;
 		public int TotalLevel => Classes.Sum(c => c.Level);
-		
+
 		// HIT POINTS
 		public HitPoints HitPoints { get; set; } = null!;
 		public const int MaxHp = 999;
-		
+
 		// HIT DICE POOL
 		public IReadOnlyCollection<HitDicePool> HitDicePools => _hitDicePools;
 		private readonly List<HitDicePool> _hitDicePools = new();
 
 		// SKILLS
-		public Skill Skills { get; set; } = null!;
+		public List<Skill> Skills { get; set; } = new();
 
 
 
@@ -67,6 +68,10 @@ namespace Whizsheet.Api.Domain
 
 			Name = name;
 			UserId = userId;
+
+			CreateAbilityScores(10, 10, 10, 10, 10, 10);
+			CreateSkills();
+			CreateHitPoints(10);
 		}
 
 		// =========================
@@ -77,7 +82,7 @@ namespace Whizsheet.Api.Domain
 			if (HitPoints != null)
 				throw new InvalidOperationException("HitPoints already exist.");
 
-			if (totalHp <= 0 || totalHp > MaxHp) 
+			if (totalHp <= 0 || totalHp > MaxHp)
 				throw new ArgumentOutOfRangeException(nameof(totalHp));
 
 			HitPoints = new HitPoints(totalHp);
@@ -103,15 +108,61 @@ namespace Whizsheet.Api.Domain
 				charisma);
 		}
 
-		public void CreateSkills()
+
+		public int GetSkillModifier(SkillType type)
 		{
-			if (Skills != null)
-				throw new InvalidOperationException("Skills already exist");
-			Skills = new Skill(false);
+			if (AbilityScores == null)
+				throw new InvalidOperationException("AbilityScores not initialized.");
+
+			int abilityModifier = type switch
+			{
+				SkillType.Acrobatics => AbilityScores.DexterityModifier,
+				SkillType.AnimalHandling => AbilityScores.WisdomModifier,
+				SkillType.Arcana => AbilityScores.IntelligenceModifier,
+				SkillType.Athletics => AbilityScores.StrengthModifier,
+				SkillType.Deception => AbilityScores.CharismaModifier,
+				SkillType.History => AbilityScores.IntelligenceModifier,
+				SkillType.Insight => AbilityScores.WisdomModifier,
+				SkillType.Intimidation => AbilityScores.CharismaModifier,
+				SkillType.Investigation => AbilityScores.IntelligenceModifier,
+				SkillType.Medicine => AbilityScores.WisdomModifier,
+				SkillType.Nature => AbilityScores.IntelligenceModifier,
+				SkillType.Perception => AbilityScores.WisdomModifier,
+				SkillType.Performance => AbilityScores.CharismaModifier,
+				SkillType.Persuasion => AbilityScores.CharismaModifier,
+				SkillType.Religion => AbilityScores.IntelligenceModifier,
+				SkillType.SleightOfHand => AbilityScores.DexterityModifier,
+				SkillType.Stealth => AbilityScores.DexterityModifier,
+				SkillType.Survival => AbilityScores.WisdomModifier,
+				_ => throw new InvalidOperationException($"Unhandled skill type: {type}")
+			};
+
+			var skill = Skills.FirstOrDefault(s => s.Type == type);
+
+			if (skill == null)
+				throw new InvalidOperationException("Skill not found.");
+
+			return skill.IsProficient
+				? abilityModifier + ProficiencyBonus
+				: abilityModifier;
 		}
 
-			
-	
+
+		public void CreateSkills()
+		{
+			if (Skills.Any())
+				throw new InvalidOperationException("Skills already created.");
+
+			foreach (SkillType type in System.Enum.GetValues<SkillType>())
+
+			{
+				Skills.Add(new Skill(type));
+			}
+		}
+
+
+
+
 
 		public void SyncHitDicePools()
 		{
@@ -146,7 +197,7 @@ namespace Whizsheet.Api.Domain
 				}
 			}
 
-			
+
 			_hitDicePools.RemoveAll(p => !breakdown.ContainsKey(p.DiceSize));
 		}
 
