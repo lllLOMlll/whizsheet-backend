@@ -122,7 +122,7 @@ namespace Whizsheet.Api.Controllers
 					Intelligence = character.AbilityScores.IntelligenceSavingThrowsModifier,
 					Wisdom = character.AbilityScores.WisdomSavingThrowsModifier,
 					Charisma = character.AbilityScores.CharismaSavingThrowsModifier
-		},
+				},
 
 				Skills = character.ToSkillsDto().Skills
 
@@ -141,6 +141,15 @@ namespace Whizsheet.Api.Controllers
 			{
 				return Unauthorized();
 			}
+
+			var character = await _db.Characters
+				.Include(c => c.AbilityScores)
+				.Include(c => c.Skills)
+				.Include(c => c.Classes)
+				.FirstOrDefaultAsync(c => c.Id == characterId && c.UserId == userId);
+
+			if (character == null) 
+				return NotFound("Character not found");
 
 			var abilityScores = await _db.AbilityScores
 				.Where(a => 
@@ -161,8 +170,41 @@ namespace Whizsheet.Api.Controllers
 			{
 				return NotFound();
 			}
-			
-			return Ok(abilityScores);
+
+			var response = new AbilityUpdateResponseDto
+			{
+				Abilities = new UpdateAbilityScoresDto
+				{
+					Strength = character.AbilityScores.Strength,
+					StrengthModifier = character.AbilityScores.StrengthModifier,
+					Dexterity = character.AbilityScores.Dexterity,
+					DexterityModifier = character.AbilityScores.DexterityModifier,
+					Constitution = character.AbilityScores.Constitution,
+					ConstitutionModifier = character.AbilityScores.ConstitutionModifier,
+					Intelligence = character.AbilityScores.Intelligence,
+					IntelligenceModifer = character.AbilityScores.IntelligenceModifier,
+					Wisdom = character.AbilityScores.Wisdom,
+					WisdomModifier = character.AbilityScores.WisdomModifier,
+					Charisma = character.AbilityScores.Charisma,
+					CharismaModifier = character.AbilityScores.CharismaModifier,
+				},
+
+				SavingThrows = new SavingThrowsDto
+				{
+					Strength = character.AbilityScores.StrengthSavingThrowsModifier,
+					Dexterity = character.AbilityScores.DexteritySavingThrowsModifier,
+					Constitution = character.AbilityScores.ConstitutionSavingThrowsModifier,
+					Intelligence = character.AbilityScores.IntelligenceSavingThrowsModifier,
+					Wisdom = character.AbilityScores.WisdomSavingThrowsModifier,
+					Charisma = character.AbilityScores.CharismaSavingThrowsModifier
+				},
+
+				Skills = character.ToSkillsDto().Skills
+
+			};
+
+
+			return Ok(response);
 		}
 
 	}
