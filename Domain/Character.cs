@@ -1,6 +1,7 @@
 ﻿using Microsoft.Identity.Client;
 using System.ComponentModel.DataAnnotations.Schema;
 using Whizsheet.Api.Domain.Extensions;
+using Whizsheet.Api.Dtos.Skills;
 using Whizsheet.Api.Enum;
 
 namespace Whizsheet.Api.Domain
@@ -77,6 +78,8 @@ namespace Whizsheet.Api.Domain
 		// =========================
 		// FACTORY METHODS
 		// =========================
+
+		//************* HIT POINTS *************
 		public void CreateHitPoints(int totalHp)
 		{
 			if (HitPoints != null)
@@ -88,6 +91,8 @@ namespace Whizsheet.Api.Domain
 			HitPoints = new HitPoints(totalHp);
 		}
 
+
+		////************* ABILITY SCORES //*************
 		public void CreateAbilityScores(
 		 int strength,
 		 int dexterity,
@@ -108,7 +113,20 @@ namespace Whizsheet.Api.Domain
 				charisma);
 		}
 
+		public SkillsDtoWithModifiers ToSkillsDto()
+		{
+			return new SkillsDtoWithModifiers
+			{
+				Skills = this.Skills.Select(s => new SkillWithModifierDto
+				{
+					Type = s.Type,
+					IsProficient = s.IsProficient,
+					Modifier = this.GetSkillModifier(s.Type)
+				}).ToList()
+			};
+		}
 
+		//************* SKILLS *************
 		public int GetSkillModifier(SkillType type)
 		{
 			if (AbilityScores == null)
@@ -162,7 +180,7 @@ namespace Whizsheet.Api.Domain
 
 
 
-
+		//************* HIT DICES************************
 
 		public void SyncHitDicePools()
 		{

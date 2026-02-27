@@ -50,7 +50,7 @@ namespace Whizsheet.Api.Controllers
 			return CreatedAtAction(
 				nameof(Get),
 				new { characterId },
-				MapToDto(character)
+				(character.ToSkillsDto())
 			);
 		}
 
@@ -76,7 +76,7 @@ namespace Whizsheet.Api.Controllers
 			if (!character.Skills.Any())
 				return NotFound("Skills not created.");
 
-			return Ok(MapToDto(character));
+			return Ok(character.ToSkillsDto());
 		}
 
 		[HttpPut]
@@ -116,25 +116,25 @@ namespace Whizsheet.Api.Controllers
 			await _dbContext.SaveChangesAsync();
 
 
-			return Ok(MapToDto(character));
+			return Ok(character.ToSkillsDto());
 		}
 
-		private SkillsDtoWithModifiers MapToDto(Character character)
-		{
-			var dto = new SkillsDtoWithModifiers();
+		//private SkillsDtoWithModifiers MapToDto(Character character)
+		//{
+		//	var dto = new SkillsDtoWithModifiers();
 
-			foreach (var skill in character.Skills)
-			{
-				dto.Skills.Add(new SkillWithModifierDto
-				{
-					Type = skill.Type,
-					IsProficient = skill.IsProficient,
-					Modifier = character.GetSkillModifier(skill.Type)
-				});
-			}
+		//	foreach (var skill in character.Skills)
+		//	{
+		//		dto.Skills.Add(new SkillWithModifierDto
+		//		{
+		//			Type = skill.Type,
+		//			IsProficient = skill.IsProficient,
+		//			Modifier = character.GetSkillModifier(skill.Type)
+		//		});
+		//	}
 
-			return dto;
-		}
+		//	return dto;
+		//}
 
 		
 	}

@@ -76,6 +76,7 @@ namespace Whizsheet.Api.Controllers
 
 			var character = await _db.Characters
 				.Include(c => c.AbilityScores)
+				.Include(c => c.Skills)
 				.FirstOrDefaultAsync(c => c.Id == characterId && c.UserId == userId);
 
 			if (character == null) return NotFound("Character not found");
@@ -94,23 +95,29 @@ namespace Whizsheet.Api.Controllers
 
 			await _db.SaveChangesAsync();
 
-			var updateDto = new UpdateAbilityScoresDto
+			var response = new AbilityUpdateResponseDto
 			{
-				Strength = character.AbilityScores.Strength,
-				StrengthModifier = character.AbilityScores.StrengthModifier,
-				Dexterity = character.AbilityScores.Dexterity,
-				DexterityModifier = character.AbilityScores.DexterityModifier,
-				Constitution = character.AbilityScores.Constitution,
-				ConstitutionModifier = character.AbilityScores.ConstitutionModifier,
-				Intelligence = character.AbilityScores.Intelligence,
-				IntelligenceModifer = character.AbilityScores.IntelligenceModifier,
-				Wisdom = character.AbilityScores.Wisdom,
-				WisdomModifier = character.AbilityScores.WisdomModifier,
-				Charisma = character.AbilityScores.Charisma,
-				CharismaModifier = character.AbilityScores.CharismaModifier,
+				Abilities = new UpdateAbilityScoresDto
+				{
+					Strength = character.AbilityScores.Strength,
+					StrengthModifier = character.AbilityScores.StrengthModifier,
+					Dexterity = character.AbilityScores.Dexterity,
+					DexterityModifier = character.AbilityScores.DexterityModifier,
+					Constitution = character.AbilityScores.Constitution,
+					ConstitutionModifier = character.AbilityScores.ConstitutionModifier,
+					Intelligence = character.AbilityScores.Intelligence,
+					IntelligenceModifer = character.AbilityScores.IntelligenceModifier,
+					Wisdom = character.AbilityScores.Wisdom,
+					WisdomModifier = character.AbilityScores.WisdomModifier,
+					Charisma = character.AbilityScores.Charisma,
+					CharismaModifier = character.AbilityScores.CharismaModifier,
+				},
+
+				Skills = character.ToSkillsDto().Skills
+
 			};
 
-			return Ok(updateDto);
+			return Ok(response);
 		}
 
 
