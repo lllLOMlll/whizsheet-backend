@@ -118,24 +118,6 @@ namespace Whizsheet.Api.Controllers
 
 			return Ok(character.ToSkillsDto());
 		}
-
-		//private SkillsDtoWithModifiers MapToDto(Character character)
-		//{
-		//	var dto = new SkillsDtoWithModifiers();
-
-		//	foreach (var skill in character.Skills)
-		//	{
-		//		dto.Skills.Add(new SkillWithModifierDto
-		//		{
-		//			Type = skill.Type,
-		//			IsProficient = skill.IsProficient,
-		//			Modifier = character.GetSkillModifier(skill.Type)
-		//		});
-		//	}
-
-		//	return dto;
-		//}
-
 		
 	}
 }

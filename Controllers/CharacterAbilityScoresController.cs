@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Whizsheet.Api.Domain;
 using Whizsheet.Api.Dtos.AbilityScores;
+using Whizsheet.Api.Dtos.SavingThrows;
 using Whizsheet.Api.Infrastructure;
 
 
@@ -112,6 +113,16 @@ namespace Whizsheet.Api.Controllers
 					Charisma = character.AbilityScores.Charisma,
 					CharismaModifier = character.AbilityScores.CharismaModifier,
 				},
+
+				SavingThrows = new SavingThrowsDto
+				{
+					Strength = character.AbilityScores.StrengthSavingThrowsModifier,
+					Dexterity = character.AbilityScores.DexteritySavingThrowsModifier,
+					Constitution = character.AbilityScores.ConstitutionSavingThrowsModifier,
+					Intelligence = character.AbilityScores.IntelligenceSavingThrowsModifier,
+					Wisdom = character.AbilityScores.WisdomSavingThrowsModifier,
+					Charisma = character.AbilityScores.CharismaSavingThrowsModifier
+		},
 
 				Skills = character.ToSkillsDto().Skills
 

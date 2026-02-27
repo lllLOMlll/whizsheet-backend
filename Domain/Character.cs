@@ -126,6 +126,118 @@ namespace Whizsheet.Api.Domain
 			};
 		}
 
+		//************* SAVING THROWS *************
+		
+		public CharacterClassType GetCharacterMainClass()
+		{
+			if (!Classes.Any())
+				throw new InvalidOperationException("Character has no classes.");
+
+			return Classes
+				.OrderByDescending(c => c.Level)
+				.First()
+				.ClassType;
+			
+		}
+
+		public int getStrengthSavingThrowsBonus()
+		{
+			var mainCharacterClass = GetCharacterMainClass();
+
+			if (mainCharacterClass == CharacterClassType.Barbarian ||
+				mainCharacterClass == CharacterClassType.Fighter ||
+				mainCharacterClass == CharacterClassType.Monk ||
+				mainCharacterClass == CharacterClassType.Ranger)
+			{
+				return ProficiencyBonus;
+			}
+
+			return 0;
+		}
+
+		public int getDexteritySavingThrowsBonus()
+		{
+			var mainCharacterClass = GetCharacterMainClass();
+
+			if (mainCharacterClass == CharacterClassType.Bard ||
+				mainCharacterClass == CharacterClassType.BloodHunter ||
+				mainCharacterClass == CharacterClassType.Monk ||
+				mainCharacterClass == CharacterClassType.Ranger ||
+				mainCharacterClass == CharacterClassType.Rogue)
+			{
+				return ProficiencyBonus;
+			}
+
+			return 0;
+		}
+
+		public int getConstitutionSavingThrowsBonus()
+		{
+			var mainCharacterClass = GetCharacterMainClass();
+
+			if (mainCharacterClass == CharacterClassType.Artificer ||
+				mainCharacterClass == CharacterClassType.Barbarian ||
+				mainCharacterClass == CharacterClassType.Fighter ||				
+				mainCharacterClass == CharacterClassType.Sorcerer)
+			{
+				return ProficiencyBonus;
+			}
+
+			return 0;
+		}
+
+		public int getIntelligenceSavingThrowsBonus()
+		{
+			var mainCharacterClass = GetCharacterMainClass();
+
+			if (mainCharacterClass == CharacterClassType.Artificer ||
+				mainCharacterClass == CharacterClassType.BloodHunter ||
+				mainCharacterClass == CharacterClassType.Druid ||
+				mainCharacterClass == CharacterClassType.Rogue||
+				mainCharacterClass == CharacterClassType.Wizard
+				)
+			{
+				return ProficiencyBonus;
+			}
+
+			return 0;
+		}
+
+		public int getWisdomSavingThrowsBonus()
+		{
+			var mainCharacterClass = GetCharacterMainClass();
+
+			if (mainCharacterClass == CharacterClassType.Cleric ||
+				mainCharacterClass == CharacterClassType.Druid||
+				mainCharacterClass == CharacterClassType.Paladin ||
+				mainCharacterClass == CharacterClassType.Warlock||
+				mainCharacterClass == CharacterClassType.Wizard 
+			)
+			{
+				return ProficiencyBonus;
+			}
+
+			return 0;
+		}
+
+		public int getCharismaSavingThrowsBonus()
+		{
+			var mainCharacterClass = GetCharacterMainClass();
+
+			if (mainCharacterClass == CharacterClassType.Bard ||
+				mainCharacterClass == CharacterClassType.Cleric||
+				mainCharacterClass == CharacterClassType.Paladin ||
+				mainCharacterClass == CharacterClassType.Sorcerer||
+				mainCharacterClass == CharacterClassType.Warlock
+			)
+			{
+				return ProficiencyBonus;
+			}
+
+			return 0;
+		}
+
+
 		//************* SKILLS *************
 		public int GetSkillModifier(SkillType type)
 		{
