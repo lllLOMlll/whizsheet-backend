@@ -45,6 +45,9 @@ namespace Whizsheet.Api.Domain
 		// SKILLS
 		public List<Skill> Skills { get; set; } = new();
 
+		// SAVING THROWS
+		public List<SavingThrow> SavingThrows { get; set; } = new();
+
 
 
 
@@ -69,10 +72,12 @@ namespace Whizsheet.Api.Domain
 
 			Name = name;
 			UserId = userId;
-
-			CreateAbilityScores(10, 10, 10, 10, 10, 10);
-			CreateSkills();
+			
 			CreateHitPoints(10);
+			CreateAbilityScores(10, 10, 10, 10, 10, 10);
+			CreateSavingThrows();
+			CreateSkills();
+			
 		}
 
 		// =========================
@@ -127,7 +132,30 @@ namespace Whizsheet.Api.Domain
 		}
 
 		//************* SAVING THROWS *************
-		
+
+		//public void CreateSkills()
+		//{
+		//	if (Skills.Any())
+		//		throw new InvalidOperationException("Skills already created.");
+
+		//	foreach (SkillType type in System.Enum.GetValues<SkillType>())
+
+		//	{
+		//		Skills.Add(new Skill(type));
+		//	}
+		//}
+
+		public void CreateSavingThrows()
+		{
+			if (SavingThrows.Any())
+				throw new InvalidOperationException("Saving throws aleready created");
+
+			foreach (SavingThrowType type in System.Enum.GetValues<SavingThrowType>())
+			{
+				SavingThrows.Add(new SavingThrow(type));
+			}
+		}
+
 		public CharacterClassType GetCharacterMainClass()
 		{
 			if (!Classes.Any())

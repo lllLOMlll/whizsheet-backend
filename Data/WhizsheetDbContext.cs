@@ -18,6 +18,7 @@ namespace Whizsheet.Api.Infrastructure
 		public DbSet<HitPoints> HitPoints => Set<HitPoints>();
 		public DbSet<HitDicePool> HitDicePools => Set<HitDicePool>();
 		public DbSet<Skill> Skills => Set<Skill>();
+		public DbSet<SavingThrow> SavingThrows => Set<SavingThrow>();
 
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
@@ -40,6 +41,12 @@ namespace Whizsheet.Api.Infrastructure
 
 			builder.Entity<Character>()
 				.HasMany(c => c.Skills)
+				.WithOne(s => s.Character)
+				.HasForeignKey(s => s.CharacterId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			builder.Entity<Character>()
+				.HasMany(c => c.SavingThrows)
 				.WithOne(s => s.Character)
 				.HasForeignKey(s => s.CharacterId)
 				.OnDelete(DeleteBehavior.Cascade);
