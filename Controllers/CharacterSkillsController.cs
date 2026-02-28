@@ -65,6 +65,7 @@ namespace Whizsheet.Api.Controllers
 			var character = await _dbContext.Characters
 				.Include(c => c.Skills)
 				.Include(c => c.AbilityScores)
+				.Include(c => c.Classes)
 				.FirstOrDefaultAsync(c =>
 					c.Id == characterId &&
 					c.UserId == userId
@@ -92,6 +93,7 @@ namespace Whizsheet.Api.Controllers
 			var character = await _dbContext.Characters
 				.Include(c => c.Skills)
 				.Include (c => c.AbilityScores)
+				.Include(c => c.Classes)
 				.FirstOrDefaultAsync(c =>
 					c.Id == characterId && 
 					c.UserId == userId);
