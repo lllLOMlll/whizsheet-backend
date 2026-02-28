@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Whizsheet.Api.Domain;
+using Whizsheet.Api.Domain.Extensions;
 using Whizsheet.Api.Dtos.AbilityScores;
 using Whizsheet.Api.Dtos.SavingThrows;
+using Whizsheet.Api.Enum;
 using Whizsheet.Api.Infrastructure;
 
 
@@ -97,6 +99,8 @@ namespace Whizsheet.Api.Controllers
 
 			await _db.SaveChangesAsync();
 
+			var characterMainClass = character.GetCharacterMainClass();
+
 			var response = new AbilityUpdateResponseDto
 			{
 				Abilities = new UpdateAbilityScoresDto
@@ -118,20 +122,26 @@ namespace Whizsheet.Api.Controllers
 				SavingThrows = new SavingThrowsDto
 				{
 					Strength = character.AbilityScores.StrengthSavingThrowsModifier,
+					IsStrengthProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Strength),
 					Dexterity = character.AbilityScores.DexteritySavingThrowsModifier,
+					IsDexterityProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Dexterity),
 					Constitution = character.AbilityScores.ConstitutionSavingThrowsModifier,
+					IsConstitutionProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Constitution),
 					Intelligence = character.AbilityScores.IntelligenceSavingThrowsModifier,
+					IsIntelligenceProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Intelligence),
 					Wisdom = character.AbilityScores.WisdomSavingThrowsModifier,
-					Charisma = character.AbilityScores.CharismaSavingThrowsModifier
+					IsWisdomProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Wisdom),
+					Charisma = character.AbilityScores.CharismaSavingThrowsModifier,
+					IsCharismaProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Charisma)
 				},
 
 				Skills = character.ToSkillsDto().Skills
 
-			};
+			}; 
 
 			return Ok(response);
 		}
-
+		
 
 		[HttpGet]
 		public async Task<IActionResult> Get(int characterId)
@@ -172,6 +182,8 @@ namespace Whizsheet.Api.Controllers
 				return NotFound();
 			}
 
+			var characterMainClass = character.GetCharacterMainClass();
+
 			var response = new AbilityUpdateResponseDto
 			{
 				Abilities = new UpdateAbilityScoresDto
@@ -193,11 +205,17 @@ namespace Whizsheet.Api.Controllers
 				SavingThrows = new SavingThrowsDto
 				{
 					Strength = character.AbilityScores.StrengthSavingThrowsModifier,
+					IsStrengthProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Strength),
 					Dexterity = character.AbilityScores.DexteritySavingThrowsModifier,
+					IsDexterityProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Dexterity),
 					Constitution = character.AbilityScores.ConstitutionSavingThrowsModifier,
+					IsConstitutionProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Constitution),
 					Intelligence = character.AbilityScores.IntelligenceSavingThrowsModifier,
+					IsIntelligenceProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Intelligence),
 					Wisdom = character.AbilityScores.WisdomSavingThrowsModifier,
-					Charisma = character.AbilityScores.CharismaSavingThrowsModifier
+					IsWisdomProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Wisdom),
+					Charisma = character.AbilityScores.CharismaSavingThrowsModifier,
+					IsCharismaProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Charisma)
 				},
 
 				Skills = character.ToSkillsDto().Skills
