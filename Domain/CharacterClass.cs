@@ -22,10 +22,24 @@ namespace Whizsheet.Api.Domain
 
 		public int CharacterId { get; set; }
 		public Character Character { get; set; } = null!;
-	
 
+		
+		private CharacterClass() { }
 
+		public CharacterClass(string name)
+		{
+			ClassType = CharacterClassType.Other;
+			CustomClassName = name;
+			Level = 1;
+		}
 
-	
+		public CharacterClass(int characterId, CharacterClassType type,  int level, string? customName = null)
+		{
+			CharacterId = characterId;
+			ClassType = type;
+			CustomClassName = customName;
+			Level = level;
+		}
+
 	}
 }

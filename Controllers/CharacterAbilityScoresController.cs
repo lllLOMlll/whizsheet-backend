@@ -23,47 +23,47 @@ namespace Whizsheet.Api.Controllers
 			_db = db;
 		}
 
-		[HttpPost]
-		public async Task<IActionResult> Create(int characterId, CreateAbilityScoresDto dto)
-		{
-			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-			if (userId == null)
-				return Unauthorized();
+		//[HttpPost]
+		//public async Task<IActionResult> Create(int characterId, CreateAbilityScoresDto dto)
+		//{
+		//	var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+		//	if (userId == null)
+		//		return Unauthorized();
 
-			var character = await _db.Characters
-				.Include(c => c.AbilityScores)
-				.FirstOrDefaultAsync(c =>
-					c.Id == characterId &&
-					c.UserId == userId);
+		//	var character = await _db.Characters
+		//		.Include(c => c.AbilityScores)
+		//		.FirstOrDefaultAsync(c =>
+		//			c.Id == characterId &&
+		//			c.UserId == userId);
 
-			if (character == null)
-				return NotFound();
+		//	if (character == null)
+		//		return NotFound();
 
-			if (character.AbilityScores != null)
-				return Conflict("Ability scores already exist.");
+		//	if (character.AbilityScores != null)
+		//		return Conflict("Ability scores already exist.");
 
-			character.CreateAbilityScores(
-				dto.Strength,
-				dto.Dexterity,
-				dto.Constitution,
-				dto.Intelligence,
-				dto.Wisdom,
-				dto.Charisma);
+		//	character.CreateAbilityScores(
+		//		dto.Strength,
+		//		dto.Dexterity,
+		//		dto.Constitution,
+		//		dto.Intelligence,
+		//		dto.Wisdom,
+		//		dto.Charisma);
 
-			await _db.SaveChangesAsync();
+		//	await _db.SaveChangesAsync();
 
-			return CreatedAtAction(nameof(Get),
-				new { characterId },
-				new AbilityScoresDto
-				{
-					Strength = character.AbilityScores!.Strength,
-					Dexterity = character.AbilityScores.Dexterity,
-					Constitution = character.AbilityScores.Constitution,
-					Intelligence = character.AbilityScores.Intelligence,
-					Wisdom = character.AbilityScores.Wisdom,
-					Charisma = character.AbilityScores.Charisma
-				});
-		}
+		//	return CreatedAtAction(nameof(Get),
+		//		new { characterId },
+		//		new AbilityScoresDto
+		//		{
+		//			Strength = character.AbilityScores!.Strength,
+		//			Dexterity = character.AbilityScores.Dexterity,
+		//			Constitution = character.AbilityScores.Constitution,
+		//			Intelligence = character.AbilityScores.Intelligence,
+		//			Wisdom = character.AbilityScores.Wisdom,
+		//			Charisma = character.AbilityScores.Charisma
+		//		});
+		//}
 
 
 		[HttpPut]
@@ -78,6 +78,7 @@ namespace Whizsheet.Api.Controllers
 			var character = await _db.Characters
 				.Include(c => c.AbilityScores)
 				.Include(c => c.Skills)
+				.Include(c => c.Classes)
 				.FirstOrDefaultAsync(c => c.Id == characterId && c.UserId == userId);
 
 			if (character == null) return NotFound("Character not found");

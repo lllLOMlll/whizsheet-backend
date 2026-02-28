@@ -1,24 +1,25 @@
-﻿using Whizsheet.Api.Dtos.SavingThrows;
+﻿using Whizsheet.Api.Domain.Rules;
+using Whizsheet.Api.Dtos.SavingThrows;
 using Whizsheet.Api.Enum;
 
 namespace Whizsheet.Api.Domain.Extensions
 {
 	public static class CharacterClassTypeExtensions
 	{
-		//public static CharacterClassDefinition GetDefinition(this CharacterClassType type)
-		//{
-		
-		//}
+		public static CharacterClassDefinition GetDefinition(this CharacterClassType type)
+		{
+			return CharacterClassRules.GetDefinition(type);
+		}
 
-		//public static bool IsProficientIn(
-		//this CharacterClassType type,
-		//SavingThrowType savingThrow)
-		//{
-		//	return type
-		//		.GetDefinition()
-		//		.SavingThrows
-		//		.Contains(savingThrow);
-		//}
+		public static bool IsProficientIn(
+		this CharacterClassType type,
+		SavingThrowType savingThrow)
+		{
+			return type
+				.GetDefinition()
+				.SavingThrows
+				.Contains(savingThrow);
+		}
 
 		public static int GetHitDie(this CharacterClassType classType)
 		{

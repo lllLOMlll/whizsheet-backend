@@ -23,49 +23,49 @@ namespace Whizsheet.Api.Controllers
 			_dbContext = dbContext;
 		}
 
-		[HttpPost]
-		public async Task<IActionResult> Create(int characterId, CreateHitPointsDto dto)
-		{
-			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+		//[HttpPost]
+		//public async Task<IActionResult> Create(int characterId, CreateHitPointsDto dto)
+		//{
+		//	var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-			if (userId == null)
-			{
-				return Unauthorized();
-			}
+		//	if (userId == null)
+		//	{
+		//		return Unauthorized();
+		//	}
 
-			var character = await _dbContext.Characters
-				.Include(c => c.HitPoints)
-				.FirstOrDefaultAsync(c => 
-					c.Id == characterId && 
-					c.UserId == userId);
+		//	var character = await _dbContext.Characters
+		//		.Include(c => c.HitPoints)
+		//		.FirstOrDefaultAsync(c => 
+		//			c.Id == characterId && 
+		//			c.UserId == userId);
 
-			if (character == null)
-			{
-				return NotFound();
-			}
+		//	if (character == null)
+		//	{
+		//		return NotFound();
+		//	}
 
-			if (character.HitPoints != null)
-			{
-				return Conflict("HitPoints already exist.");
-			}
+		//	if (character.HitPoints != null)
+		//	{
+		//		return Conflict("HitPoints already exist.");
+		//	}
 
-			character.CreateHitPoints(dto.TotalHitPoints);
+		//	character.CreateHitPoints(dto.TotalHitPoints);
 
-			await _dbContext.SaveChangesAsync();	
+		//	await _dbContext.SaveChangesAsync();	
 
-			var result = new HitPointsDto
-			{
-				TotalHitPoints = character.HitPoints!.TotalHitPoints,
-				CurrentHitPoints = character.HitPoints.CurrentHitPoints,
-				TemporaryHitPoints = character.HitPoints.TemporaryHitPoints
-			};
+		//	var result = new HitPointsDto
+		//	{
+		//		TotalHitPoints = character.HitPoints!.TotalHitPoints,
+		//		CurrentHitPoints = character.HitPoints.CurrentHitPoints,
+		//		TemporaryHitPoints = character.HitPoints.TemporaryHitPoints
+		//	};
 	
-			return CreatedAtAction(
-				nameof(Get),
-				new { characterId },
-				result
-				);
-		}
+		//	return CreatedAtAction(
+		//		nameof(Get),
+		//		new { characterId },
+		//		result
+		//		);
+		//}
 
 
 		[HttpGet]

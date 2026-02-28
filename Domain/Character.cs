@@ -72,11 +72,12 @@ namespace Whizsheet.Api.Domain
 
 			Name = name;
 			UserId = userId;
-			
-			CreateHitPoints(10);
-			CreateAbilityScores(10, 10, 10, 10, 10, 10);
-			CreateSavingThrows();
-			CreateSkills();
+
+			CreateStartingClass("Starting Class");
+			CreateStartingHitPoints(10);
+			CreateStartingAbilityScores(10, 10, 10, 10, 10, 10);
+			CreateStartingSavingThrows();
+			CreateStartingSkills();
 			
 		}
 
@@ -85,7 +86,20 @@ namespace Whizsheet.Api.Domain
 		// =========================
 
 		//************* HIT POINTS *************
-		public void CreateHitPoints(int totalHp)
+		public void CreateStartingClass(string startingClass)
+		{
+			if (Classes.Any())
+				throw new InvalidOperationException("Classes already created");
+
+			var characterStartingClass = new CharacterClass("Starting Class");
+
+			Classes.Add(characterStartingClass);
+
+		}
+
+		
+		//************* HIT POINTS *************
+		public void CreateStartingHitPoints(int totalHp)
 		{
 			if (HitPoints != null)
 				throw new InvalidOperationException("HitPoints already exist.");
@@ -98,7 +112,7 @@ namespace Whizsheet.Api.Domain
 
 
 		////************* ABILITY SCORES //*************
-		public void CreateAbilityScores(
+		public void CreateStartingAbilityScores(
 		 int strength,
 		 int dexterity,
 		 int constitution,
@@ -133,19 +147,7 @@ namespace Whizsheet.Api.Domain
 
 		//************* SAVING THROWS *************
 
-		//public void CreateSkills()
-		//{
-		//	if (Skills.Any())
-		//		throw new InvalidOperationException("Skills already created.");
-
-		//	foreach (SkillType type in System.Enum.GetValues<SkillType>())
-
-		//	{
-		//		Skills.Add(new Skill(type));
-		//	}
-		//}
-
-		public void CreateSavingThrows()
+		public void CreateStartingSavingThrows()
 		{
 			if (SavingThrows.Any())
 				throw new InvalidOperationException("Saving throws aleready created");
@@ -154,6 +156,18 @@ namespace Whizsheet.Api.Domain
 			{
 				SavingThrows.Add(new SavingThrow(type));
 			}
+
+			var mainCharacterClass = GetCharacterMainClass();
+		
+			foreach (SavingThrow s in SavingThrows)
+			{
+				if (CharacterClassTypeExtensions.IsProficientIn(
+					mainCharacterClass,
+					s.Type))
+				{
+					s.SetProficiency(true);
+				}
+			}	
 		}
 
 		public CharacterClassType GetCharacterMainClass()
@@ -306,7 +320,7 @@ namespace Whizsheet.Api.Domain
 		}
 
 
-		public void CreateSkills()
+		public void CreateStartingSkills()
 		{
 			if (Skills.Any())
 				throw new InvalidOperationException("Skills already created.");
@@ -315,7 +329,7 @@ namespace Whizsheet.Api.Domain
 
 			{
 				Skills.Add(new Skill(type));
-			}
+			}	
 		}
 
 
