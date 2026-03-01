@@ -7,7 +7,7 @@ namespace Whizsheet.Api.Domain
 	{
 		public int Id { get; set; }
 		
-		public SavingThrowType Type { get; private set; }
+		public SavingThrowType SavingThrowType { get; private set; }
 		public bool IsProficient { get; private set; }
 		public int CharacterId { get; private set; }
 		public Character Character { get; private set; } = null!;
@@ -16,7 +16,7 @@ namespace Whizsheet.Api.Domain
 
 		public SavingThrow(SavingThrowType type)
 		{
-			Type = type;
+			SavingThrowType = type;
 			IsProficient = false;
 		}
 
