@@ -77,8 +77,7 @@ namespace Whizsheet.Api.Domain
 			CreateStartingHitPoints(10);
 			CreateStartingAbilityScores(10, 10, 10, 10, 10, 10);
 			CreateStartingSavingThrows();
-			CreateStartingSkills();
-			
+			CreateStartingSkills();		
 		}
 
 		// =========================
@@ -163,7 +162,7 @@ namespace Whizsheet.Api.Domain
 			{
 				if (CharacterClassTypeExtensions.IsProficientIn(
 					mainCharacterClass,
-					s.Type))
+					s.SavingThrowType))
 				{
 					s.SetProficiency(true);
 				}

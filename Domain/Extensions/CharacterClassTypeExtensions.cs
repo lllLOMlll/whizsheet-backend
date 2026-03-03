@@ -12,8 +12,9 @@ namespace Whizsheet.Api.Domain.Extensions
 		}
 
 		public static bool IsProficientIn(
-		this CharacterClassType type,
-		SavingThrowType savingThrow)
+			this CharacterClassType type,
+			SavingThrowType savingThrow
+			)
 		{
 			return type
 				.GetDefinition()
