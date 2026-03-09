@@ -89,32 +89,26 @@ namespace Whizsheet.Api.Controllers
 				if (existingtSavingThrow != null)
 				{
 					existingtSavingThrow.SetProficiency(dto.IsProficient);
-					Console.WriteLine("dto.IsProficient" + " = " + dto.IsProficient);
+					
 				}
 
 			}
 
 			await _dbContext.SaveChangesAsync();
 
-
-			var characterMainClass = character.GetCharacterMainClass();
-			var responseDto = new SavingThrowsDto
+			var updatedDto = new SavingTrowsListDto
 			{
-				Strength = character.AbilityScores.StrengthSavingThrowsModifier,
-				IsStrengthProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Strength),
-				Dexterity = character.AbilityScores.DexteritySavingThrowsModifier,
-				IsDexterityProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Dexterity),
-				Constitution = character.AbilityScores.ConstitutionSavingThrowsModifier,
-				IsConstitutionProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Constitution),
-				Intelligence = character.AbilityScores.IntelligenceSavingThrowsModifier,
-				IsIntelligenceProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Intelligence),
-				Wisdom = character.AbilityScores.WisdomSavingThrowsModifier,
-				IsWisdomProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Wisdom),
-				Charisma = character.AbilityScores.CharismaSavingThrowsModifier,
-				IsCharismaProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Charisma)
+
+				SavingThrowsListDto = character.SavingThrows
+					.Select(st => new SavingThrowDto
+					{
+						SavingThrowType = st.SavingThrowType,
+						IsProficient = st.IsProficient,
+						Modifier = character.getSavingThrowScore(st.SavingThrowType),
+					}).ToList()
 			};
 
-			return Ok(responseDto);
+			return Ok(updatedDto);
 		}
 
 		[HttpPut("first-update")]

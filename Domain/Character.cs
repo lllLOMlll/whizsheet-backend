@@ -181,7 +181,7 @@ namespace Whizsheet.Api.Domain
 			
 		}
 
-		public int getStrengthSavingThrowsBonus()
+		public int getStartingStrengthSavingThrowsBonus()
 		{
 			var mainCharacterClass = GetCharacterMainClass();
 
@@ -196,7 +196,7 @@ namespace Whizsheet.Api.Domain
 			return 0;
 		}
 
-		public int getDexteritySavingThrowsBonus()
+		public int getStartingDexteritySavingThrowsBonus()
 		{
 			var mainCharacterClass = GetCharacterMainClass();
 
@@ -212,7 +212,7 @@ namespace Whizsheet.Api.Domain
 			return 0;
 		}
 
-		public int getConstitutionSavingThrowsBonus()
+		public int getStartingConstitutionSavingThrowsBonus()
 		{
 			var mainCharacterClass = GetCharacterMainClass();
 
@@ -227,7 +227,7 @@ namespace Whizsheet.Api.Domain
 			return 0;
 		}
 
-		public int getIntelligenceSavingThrowsBonus()
+		public int getStartingIntelligenceSavingThrowsBonus()
 		{
 			var mainCharacterClass = GetCharacterMainClass();
 
@@ -244,7 +244,7 @@ namespace Whizsheet.Api.Domain
 			return 0;
 		}
 
-		public int getWisdomSavingThrowsBonus()
+		public int getStartingWisdomSavingThrowsBonus()
 		{
 			var mainCharacterClass = GetCharacterMainClass();
 
@@ -261,7 +261,7 @@ namespace Whizsheet.Api.Domain
 			return 0;
 		}
 
-		public int getCharismaSavingThrowsBonus()
+		public int getStartingCharismaSavingThrowsBonus()
 		{
 			var mainCharacterClass = GetCharacterMainClass();
 
@@ -278,6 +278,39 @@ namespace Whizsheet.Api.Domain
 			return 0;
 		}
 
+		public int getSavingThrowBonus(SavingThrowType savingThrowType)
+		{
+			foreach (var st in SavingThrows)
+			{
+				if (st.SavingThrowType == savingThrowType)
+				{
+					if (st.IsProficient) 
+						return ProficiencyBonus;
+				}
+
+			}
+			return 0;
+		}
+
+		public int getSavingThrowScore(SavingThrowType savingThrowType)
+		{
+			foreach (var st in SavingThrows)
+
+				if (st.SavingThrowType == savingThrowType)
+				{
+					switch (savingThrowType)
+					{
+						case SavingThrowType.Strength: return AbilityScores.StrengthSavingThrowsModifier;
+						case SavingThrowType.Dexterity: return AbilityScores.DexteritySavingThrowsModifier;
+						case SavingThrowType.Constitution: return AbilityScores.ConstitutionSavingThrowsModifier;
+						case SavingThrowType.Intelligence: return AbilityScores.IntelligenceSavingThrowsModifier;
+						case SavingThrowType.Wisdom: return AbilityScores.WisdomSavingThrowsModifier;
+						case SavingThrowType.Charisma: return AbilityScores.CharismaSavingThrowsModifier;
+					}
+
+				}
+			return ProficiencyBonus;
+		}
 
 		//************* SKILLS *************
 		public int GetSkillModifier(SkillType type)
