@@ -43,18 +43,20 @@ namespace Whizsheet.Api.Controllers
 			if (character == null)
 				return NotFound();
 
-			var savingThrowsdDto = new SavingTrowsListDto
+			var savingThrowsDto = new SavingTrowsListDto
 			{
+
 				SavingThrowsListDto = character.SavingThrows
-					.Select(st => new SavingThrowDto
-			{
-				SavingThrowType = st.SavingThrowType,
-				IsProficient = st.IsProficient,
-			}).ToList()
+				.Select(st => new SavingThrowDto
+				{
+					SavingThrowType = st.SavingThrowType,
+					IsProficient = st.IsProficient,
+					Modifier = character.getSavingThrowScore(st.SavingThrowType),
+				}).ToList()
 			};
 
 
-			return Ok(savingThrowsdDto);
+			return Ok(savingThrowsDto);
 		}
 
 		
