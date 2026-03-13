@@ -1,23 +1,13 @@
 ﻿using Whizsheet.Api.Dtos.MagicItem;
+using Whizsheet.Api.Dtos.Item
 using Whizsheet.Api.Enum.Item;
 using Whizsheet.Api.Enum.Weapon;
 
 namespace Whizsheet.Api.Dtos.Weapon
 {
-	public class WeaponDto
+	public class WeaponDto : ItemDto
 	{
-		public Guid Id { get; set; }
-
-		public string Name { get; set; } = string.Empty;
-
-		public string Description { get; set; } = string.Empty;
-
-		public ItemRarityType ItemRarity { get; set; }
-
-		public int Value { get; set; }
-
-		public double Weight { get; set; }
-
+	
 		public AttackType? AttackType { get; set; }
 
 		public BonusAttackRollType? BonusAttackRollType { get; set; }
@@ -48,6 +38,5 @@ namespace Whizsheet.Api.Dtos.Weapon
 
 		public bool IsSpecial { get; set; }
 
-		public MagicItemDto? MagicItem { get; set; }
 	}
 }

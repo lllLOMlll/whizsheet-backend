@@ -198,9 +198,5 @@ namespace Whizsheet.Api.Controllers
 
 			return magicItemDto;
 		}
-
-
-
-
 	}
 }
