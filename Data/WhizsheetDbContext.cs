@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Whizsheet.Api.Domain;
+using Whizsheet.Api.Domain.Items;
 
 namespace Whizsheet.Api.Infrastructure
 {
@@ -19,6 +20,11 @@ namespace Whizsheet.Api.Infrastructure
 		public DbSet<HitDicePool> HitDicePools => Set<HitDicePool>();
 		public DbSet<Skill> Skills => Set<Skill>();
 		public DbSet<SavingThrow> SavingThrows => Set<SavingThrow>();
+		public DbSet<CharacterItem> CharacterItems => Set<CharacterItem>();
+		public DbSet<Item> Items => Set<Item>();
+		public DbSet<Weapon> Weapons => Set<Weapon>();
+		public DbSet<MagicItem> MagicItems => Set<MagicItem>();
+		public DbSet<MagicItemEffect> MagicItemEffects => Set<MagicItemEffect>();
 
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
@@ -101,6 +107,18 @@ namespace Whizsheet.Api.Infrastructure
 			builder.Entity<HitDicePool>()
 				.Property(p => p.Remaining)
 				.IsRequired();
+
+			builder.Entity<Character>()
+				.HasMany<CharacterItem>()
+				.WithOne(ci => ci.Character)
+				.HasForeignKey(ci => ci.CharacterId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			builder.Entity<CharacterItem>()
+				.HasOne(ci => ci.Item)
+				.WithMany()
+				.HasForeignKey(ci => ci.ItemId)
+				.OnDelete(DeleteBehavior.Cascade);
 
 
 

@@ -1,6 +1,6 @@
 ﻿namespace Whizsheet.Api.Enum
 {
-	public enum HitDice
+	public enum HitDiceType
 	{
 		d6 = 0,
 		d8 = 1,

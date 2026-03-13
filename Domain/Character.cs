@@ -1,5 +1,5 @@
-﻿using Microsoft.Identity.Client;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Whizsheet.Api.Domain.Items;
 using Whizsheet.Api.Domain.Extensions;
 using Whizsheet.Api.Dtos.Skills;
 using Whizsheet.Api.Enum;
@@ -47,6 +47,10 @@ namespace Whizsheet.Api.Domain
 
 		// SAVING THROWS
 		public List<SavingThrow> SavingThrows { get; set; } = new();
+
+		// ITEMS
+		public List<CharacterItem> Items { get; set; } = new();
+
 
 
 

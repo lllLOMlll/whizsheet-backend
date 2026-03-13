@@ -85,8 +85,6 @@ namespace Whizsheet.Api.Controllers
 			{
 				var existingtSavingThrow = character.SavingThrows
 					.FirstOrDefault(c => c.SavingThrowType == dto.SavingThrowType);
-				Console.WriteLine("dto.SavingThrowType = " + dto.SavingThrowType);
-				Console.WriteLine("existingSavingThrow = " + existingtSavingThrow + " = " + "characer.SavingThrows = " + character.SavingThrows);
 
 				if (existingtSavingThrow != null)
 				{
@@ -116,14 +114,11 @@ namespace Whizsheet.Api.Controllers
 		[HttpPut("first-update")]
 		public async Task<IActionResult> FirstUpdate(int characterId)
 		{
-			Console.WriteLine("=== FIRST UPDATE START ===");
-			Console.WriteLine($"CharacterId reçu: {characterId}");
-
+			
 			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
 			if (userId == null)
-			{
-				Console.WriteLine("UserId NULL -> Unauthorized");
+			{		
 				return Unauthorized();
 			}
 
@@ -139,39 +134,25 @@ namespace Whizsheet.Api.Controllers
 
 			if (character == null)
 			{
-				Console.WriteLine("Character NOT FOUND");
 				return NotFound();
 			}
 
-			Console.WriteLine($"Character trouvé: {character.Name}");
-			Console.WriteLine($"Nombre de classes: {character.Classes.Count}");
-			Console.WriteLine($"Nombre de saving throws: {character.SavingThrows.Count}");
-
 			var mainCharacterClass = character.GetCharacterMainClass();
-			Console.WriteLine($"Main class: {mainCharacterClass}");
+		
 
 			foreach (SavingThrow s in character.SavingThrows)
 			{
 				var isProficient = CharacterClassTypeExtensions
 					.IsProficientIn(mainCharacterClass, s.SavingThrowType);
-
-				Console.WriteLine(
-					$"SavingThrow: {s.SavingThrowType} | Avant: {s.IsProficient} | Devrait être prof?: {isProficient}"
-				);
-
+	
 				if (isProficient)
 				{
 					s.SetProficiency(true);
-					Console.WriteLine($" --> Proficiency SET TRUE pour {s.SavingThrowType}");
 				}
 			}
 
-			Console.WriteLine("Sauvegarde en base...");
 			await _dbContext.SaveChangesAsync();
-			Console.WriteLine("SaveChangesAsync terminé.");
-
-			Console.WriteLine("=== FIRST UPDATE END ===");
-
+	
 			return Ok();
 		}
 	}

@@ -1,0 +1,47 @@
+﻿namespace Whizsheet.Api.Domain.Items
+{
+	public enum PotionType
+	{
+		// Order in alphabetical order?
+		Healing,
+		HealingGreater,
+		HealingSuperior,
+		HealingSupreme,
+		AnimalFriendship,
+		Clairvoyance,
+		Climbing,
+		Diminution,
+		Flying,
+		GaseousForm,
+		GiantStrengthHill,
+		GiantStrengthFrost,
+		GiantStrengthStone,
+		GiantStrengthFire,
+		GiantStrengthCloud,
+		GiantStrengthStorm,
+		Growth,
+		Heroism,
+		Invisibility,
+		Invulnerability,
+		Longevity,
+		MindReading,
+		Poison,
+		ResistanceAcid,
+		ResistanceCold,
+		ResistanceFire,
+		ResistanceForce,
+		ResistanceLightning,
+		ResistanceNecrotic,
+		ResistancePoison,
+		ResistancePsychic,
+		ResistanceRadiant,
+		ResistanceThunder,
+		Speed,
+		VigorousHealth,
+		WaterBreathing,
+		OilOfSharpness,
+		OilOfSlipperiness,
+		OilOfEtherealness,
+		PhilterOfLove
+	}
+}
