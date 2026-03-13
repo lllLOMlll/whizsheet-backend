@@ -1,13 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using Whizsheet.Api.Domain;
 using Whizsheet.Api.Domain.Items;
 using Whizsheet.Api.Dtos.MagicItem;
 using Whizsheet.Api.Dtos.Weapon;
-using Whizsheet.Api.Enum;
-using Whizsheet.Api.Enum.Item;
-using Whizsheet.Api.Enum.Weapon;
 using Whizsheet.Api.Infrastructure;
 
 namespace Whizsheet.Api.Controllers
@@ -111,7 +107,6 @@ namespace Whizsheet.Api.Controllers
 			return Ok(new { characterItem.Id });
 		}
 
-
 		[HttpGet]
 		public async Task<IActionResult> Get(int characterId)
 		{
@@ -122,70 +117,81 @@ namespace Whizsheet.Api.Controllers
 
 			var character = await _db.Characters
 				.Include(c => c.Items)
-				.ThenInclude(ci => ci.Item)
+					.ThenInclude(ci => ci.Item)
+						.ThenInclude(i => i.MagicItem)
+							.ThenInclude(mi => mi.MagicItemEffects)
 				.FirstOrDefaultAsync(c =>
 					c.Id == characterId &&
 					c.UserId == userId);
 
-			if (character == null) return NotFound();
+			if (character == null)
+				return NotFound();
 
-			var weapons = character.Items
-				.Select(ci => ci.Item)
-				.OfType<Weapon>()
+			var result = character.Items
+				.Where(ci => ci.Item is Weapon)
+				.Select(ci => new CharacterWeaponDto
+				{
+					CharacterItemId = ci.Id,
+
+					Quantity = ci.Quantity,
+					IsEquipped = ci.IsEquipped,
+					IsAttuned = ci.IsAttuned,
+					ChargesRemaining = ci.ChargesRemaining,
+
+					Weapon = ConvertWeaponDomainToDTO((Weapon)ci.Item)
+				})
 				.ToList();
 
-			if (!weapons.Any()) return NotFound();
-
-			var weaponListDto = new List<WeaponDto>();
-			foreach (var weapon in weapons)
-			{
-				var weaponDto = new WeaponDto
-				{
-					Id = weapon.Id,
-					Name = weapon.Name,
-					Description = weapon.Description,
-					ItemRarity = weapon.ItemRarity,
-					Value = weapon.Value,
-					Weight = weapon.Weight,
-					AttackType = weapon.AttackType,
-					BonusAttackRollType = weapon.BonusAttackRollType,
-					DamageDiceType = weapon.DamageDiceType,
-					DamageType = weapon.DamageType,
-					RangeType = weapon.RangeType,
-					IsLight = weapon.IsLight,
-					IsFinesse = weapon.IsFinesse,
-					IsThrown = weapon.IsThrown,
-					IsVersatile = weapon.IsVersatile,
-					IsAmmunition = weapon.IsAmmunition,
-					IsHeavy = weapon.IsHeavy,
-					IsReach = weapon.IsReach,
-					IsTwoHanded = weapon.IsTwoHanded,
-					IsLoading = weapon.IsLoading,
-					IsSpecial = weapon.IsSpecial,
-					MagicItem = ConvertMagicItemWeaponDomainToDTO(weapon)
-				};
-
-				weaponListDto.Add(weaponDto);
-			}
-
-
-			return Ok(weaponListDto);
+			return Ok(result);
 		}
 
-
-		public MagicItemDto? ConvertMagicItemWeaponDomainToDTO(Weapon weapon)
+		// MAP WEAPON
+		private WeaponDto ConvertWeaponDomainToDTO(Weapon weapon)
 		{
-			if (weapon.MagicItem == null)
+			return new WeaponDto
+			{
+				Id = weapon.Id,
+				Name = weapon.Name,
+				Description = weapon.Description,
+				ItemRarity = weapon.ItemRarity,
+				Value = weapon.Value,
+				Weight = weapon.Weight,
+
+				AttackType = weapon.AttackType,
+				BonusAttackRollType = weapon.BonusAttackRollType,
+				DamageDiceType = weapon.DamageDiceType,
+				DamageType = weapon.DamageType,
+				RangeType = weapon.RangeType,
+
+				IsLight = weapon.IsLight,
+				IsFinesse = weapon.IsFinesse,
+				IsThrown = weapon.IsThrown,
+				IsVersatile = weapon.IsVersatile,
+				IsAmmunition = weapon.IsAmmunition,
+				IsHeavy = weapon.IsHeavy,
+				IsReach = weapon.IsReach,
+				IsTwoHanded = weapon.IsTwoHanded,
+				IsLoading = weapon.IsLoading,
+				IsSpecial = weapon.IsSpecial,
+
+				MagicItem = ConvertMagicItemDomainToDTO(weapon.MagicItem)
+			};
+		}
+
+		// MAP MAGIC ITEM
+		private MagicItemDto? ConvertMagicItemDomainToDTO(MagicItem? magicItem)
+		{
+			if (magicItem == null)
 				return null;
 
-			var magicItemDto = new MagicItemDto
+			var dto = new MagicItemDto
 			{
-				RequiresAttunement = weapon.MagicItem.RequiresAttunement
+				RequiresAttunement = magicItem.RequiresAttunement
 			};
 
-			foreach (var effect in weapon.MagicItem.MagicItemEffects)
+			foreach (var effect in magicItem.MagicItemEffects)
 			{
-				magicItemDto.Effects.Add(new MagicItemEffectDto
+				dto.Effects.Add(new MagicItemEffectDto
 				{
 					EffectType = effect.EffectType,
 					AbilityScore = effect.AbilityScore,
@@ -196,7 +202,7 @@ namespace Whizsheet.Api.Controllers
 				});
 			}
 
-			return magicItemDto;
+			return dto;
 		}
 	}
 }
