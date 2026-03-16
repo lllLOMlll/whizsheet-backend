@@ -1,13 +1,10 @@
 ﻿using Whizsheet.Api.Dtos.Item;
-using Whizsheet.Api.Dtos.MagicItem;
-using Whizsheet.Api.Enum.Item;
 using Whizsheet.Api.Enum.Weapon;
 
 namespace Whizsheet.Api.Dtos.Weapon
 {
-	public class CreateCharacterWeaponDto : ItemDto
+	public class CreateWeaponDto : CreateItemDto
 	{
-	
 		public AttackType? AttackType { get; set; }
 
 		public BonusAttackRollType? BonusAttackRollType { get; set; }
@@ -37,14 +34,5 @@ namespace Whizsheet.Api.Dtos.Weapon
 		public bool IsLoading { get; set; }
 
 		public bool IsSpecial { get; set; }
-
-		public bool IsEquipped { get; set; }
-
-		public int Quantity { get; set; } = 1;
-
-		public bool IsAttuned { get; set; }
-
-		public int? ChargesRemaining { get; set; }
-
 	}
 }

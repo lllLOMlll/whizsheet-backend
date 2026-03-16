@@ -17,8 +17,6 @@ namespace Whizsheet.Api.Domain.Items
 
 		public int Modifier { get; set; }
 
-		public string Description { get; set; } = string.Empty;
-
 		public Guid MagicItemId { get; set; }
 
 		public MagicItem MagicItem { get; set; } = null!;

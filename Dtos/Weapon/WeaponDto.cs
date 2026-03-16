@@ -1,13 +1,10 @@
-﻿using Whizsheet.Api.Dtos.MagicItem;
-using Whizsheet.Api.Dtos.Item
-using Whizsheet.Api.Enum.Item;
+﻿using Whizsheet.Api.Dtos.Item;
 using Whizsheet.Api.Enum.Weapon;
 
 namespace Whizsheet.Api.Dtos.Weapon
 {
 	public class WeaponDto : ItemDto
 	{
-	
 		public AttackType? AttackType { get; set; }
 
 		public BonusAttackRollType? BonusAttackRollType { get; set; }
@@ -37,6 +34,5 @@ namespace Whizsheet.Api.Dtos.Weapon
 		public bool IsLoading { get; set; }
 
 		public bool IsSpecial { get; set; }
-
 	}
 }

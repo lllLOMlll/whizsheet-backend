@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Whizsheet.Api.Domain.Items;
@@ -8,6 +9,7 @@ using Whizsheet.Api.Infrastructure;
 
 namespace Whizsheet.Api.Controllers
 {
+	[Authorize]
 	[ApiController]
 	[Route("api/v1/characters/{characterId:int}/items/weapons")]
 	public class WeaponsController : ControllerBase
@@ -20,14 +22,14 @@ namespace Whizsheet.Api.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Create(
-			int characterId,
-			CreateCharacterWeaponDto dto)
+		public async Task<IActionResult> Create(int characterId, [FromBody] CreateWeaponDto dto)
 		{
 			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
 			if (userId == null)
+			{
 				return Unauthorized();
+			}
 
 			var character = await _db.Characters
 				.FirstOrDefaultAsync(c =>
@@ -35,16 +37,24 @@ namespace Whizsheet.Api.Controllers
 					c.UserId == userId);
 
 			if (character == null)
+			{
 				return NotFound();
+			}
 
 			var weapon = new Weapon
 			{
 				Id = Guid.NewGuid(),
+				CharacterId = characterId,
+
 				Name = dto.Name,
 				Description = dto.Description,
 				ItemRarity = dto.ItemRarity,
 				Value = dto.Value,
 				Weight = dto.Weight,
+
+				IsEquipped = dto.IsEquipped,
+				IsAttuned = dto.IsAttuned,
+				Quantity = dto.Quantity,
 
 				AttackType = dto.AttackType,
 				BonusAttackRollType = dto.BonusAttackRollType,
@@ -69,7 +79,12 @@ namespace Whizsheet.Api.Controllers
 				var magicItem = new MagicItem
 				{
 					Id = Guid.NewGuid(),
-					RequiresAttunement = dto.MagicItem.RequiresAttunement
+					RequiresAttunement = dto.MagicItem.RequiresAttunement,
+					MagicEffectDescription = dto.MagicItem.MagicEffectDescription,
+					MagicEffectMechanics = dto.MagicItem.MagicEffectMechanics,
+					TotalCharges = dto.MagicItem.TotalCharges,
+					ChargesRemaining = dto.MagicItem.ChargesRemaining,
+					MagicRechargeRate = dto.MagicItem.MagicRechargeRate
 				};
 
 				foreach (var effectDto in dto.MagicItem.Effects)
@@ -81,30 +96,28 @@ namespace Whizsheet.Api.Controllers
 						AbilityScore = effectDto.AbilityScore,
 						SavingThrow = effectDto.SavingThrow,
 						Skill = effectDto.Skill,
-						Modifier = effectDto.Modifier,
-						Description = effectDto.Description
+						Modifier = effectDto.Modifier
 					});
 				}
 
 				weapon.MagicItem = magicItem;
 			}
 
-			var characterItem = new CharacterItem
-			{
-				Id = Guid.NewGuid(),
-				CharacterId = characterId,
-				Item = weapon,
-				Quantity = dto.Quantity,
-				IsEquipped = dto.IsEquipped,
-				IsAttuned = dto.IsAttuned,
-				ChargesRemaining = dto.ChargesRemaining
-			};
-
-			_db.CharacterItems.Add(characterItem);
+			_db.Set<Weapon>().Add(weapon);
 
 			await _db.SaveChangesAsync();
 
-			return Ok(new { characterItem.Id });
+			var result = await _db.Set<Weapon>()
+				.Include(w => w.MagicItem)
+					.ThenInclude(mi => mi.MagicItemEffects)
+				.FirstAsync(w => w.Id == weapon.Id);
+
+			var weaponDto = ConvertWeaponToDto(result);
+
+			return CreatedAtAction(
+				nameof(GetById),
+				new { characterId = characterId, weaponId = weapon.Id },
+				weaponDto);
 		}
 
 		[HttpGet]
@@ -113,40 +126,64 @@ namespace Whizsheet.Api.Controllers
 			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
 			if (userId == null)
+			{
 				return Unauthorized();
+			}
 
-			var character = await _db.Characters
-				.Include(c => c.Items)
-					.ThenInclude(ci => ci.Item)
-						.ThenInclude(i => i.MagicItem)
-							.ThenInclude(mi => mi.MagicItemEffects)
-				.FirstOrDefaultAsync(c =>
+			var characterExists = await _db.Characters
+				.AnyAsync(c =>
 					c.Id == characterId &&
 					c.UserId == userId);
 
-			if (character == null)
+			if (!characterExists)
+			{
 				return NotFound();
+			}
 
-			var result = character.Items
-				.Where(ci => ci.Item is Weapon)
-				.Select(ci => new CharacterWeaponDto
-				{
-					CharacterItemId = ci.Id,
+			var weapons = await _db.Set<Weapon>()
+				.Include(w => w.MagicItem)
+					.ThenInclude(mi => mi.MagicItemEffects)
+				.Where(w =>
+					w.CharacterId == characterId &&
+					w.Character.UserId == userId)
+				.ToListAsync();
 
-					Quantity = ci.Quantity,
-					IsEquipped = ci.IsEquipped,
-					IsAttuned = ci.IsAttuned,
-					ChargesRemaining = ci.ChargesRemaining,
-
-					Weapon = ConvertWeaponDomainToDTO((Weapon)ci.Item)
-				})
+			var weaponDtos = weapons
+				.Select(ConvertWeaponToDto)
 				.ToList();
 
-			return Ok(result);
+			return Ok(weaponDtos);
 		}
 
-		// MAP WEAPON
-		private WeaponDto ConvertWeaponDomainToDTO(Weapon weapon)
+		[HttpGet("{weaponId:guid}")]
+		public async Task<IActionResult> GetById(int characterId, Guid weaponId)
+		{
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+			if (userId == null)
+			{
+				return Unauthorized();
+			}
+
+			var weapon = await _db.Set<Weapon>()
+				.Include(w => w.MagicItem)
+					.ThenInclude(mi => mi.MagicItemEffects)
+				.FirstOrDefaultAsync(w =>
+					w.Id == weaponId &&
+					w.CharacterId == characterId &&
+					w.Character.UserId == userId);
+
+			if (weapon == null)
+			{
+				return NotFound();
+			}
+
+			var weaponDto = ConvertWeaponToDto(weapon);
+
+			return Ok(weaponDto);
+		}
+
+		private WeaponDto ConvertWeaponToDto(Weapon weapon)
 		{
 			return new WeaponDto
 			{
@@ -156,13 +193,15 @@ namespace Whizsheet.Api.Controllers
 				ItemRarity = weapon.ItemRarity,
 				Value = weapon.Value,
 				Weight = weapon.Weight,
+				IsEquipped = weapon.IsEquipped,
+				IsAttuned = weapon.IsAttuned,
+				Quantity = weapon.Quantity,
 
 				AttackType = weapon.AttackType,
 				BonusAttackRollType = weapon.BonusAttackRollType,
 				DamageDiceType = weapon.DamageDiceType,
 				DamageType = weapon.DamageType,
 				RangeType = weapon.RangeType,
-
 				IsLight = weapon.IsLight,
 				IsFinesse = weapon.IsFinesse,
 				IsThrown = weapon.IsThrown,
@@ -174,31 +213,38 @@ namespace Whizsheet.Api.Controllers
 				IsLoading = weapon.IsLoading,
 				IsSpecial = weapon.IsSpecial,
 
-				MagicItem = ConvertMagicItemDomainToDTO(weapon.MagicItem)
+				MagicItem = ConvertMagicItemToDto(weapon.MagicItem)
 			};
 		}
 
-		// MAP MAGIC ITEM
-		private MagicItemDto? ConvertMagicItemDomainToDTO(MagicItem? magicItem)
+		private MagicItemDto? ConvertMagicItemToDto(MagicItem? magicItem)
 		{
 			if (magicItem == null)
+			{
 				return null;
+			}
 
 			var dto = new MagicItemDto
 			{
-				RequiresAttunement = magicItem.RequiresAttunement
+				Id = magicItem.Id,
+				RequiresAttunement = magicItem.RequiresAttunement,
+				MagicEffectDescription = magicItem.MagicEffectDescription,
+				MagicEffectMechanics = magicItem.MagicEffectMechanics,
+				TotalCharges = magicItem.TotalCharges,
+				ChargesRemaining = magicItem.ChargesRemaining,
+				MagicRechargeRate = magicItem.MagicRechargeRate
 			};
 
 			foreach (var effect in magicItem.MagicItemEffects)
 			{
 				dto.Effects.Add(new MagicItemEffectDto
 				{
+					Id = effect.Id,
 					EffectType = effect.EffectType,
 					AbilityScore = effect.AbilityScore,
 					SavingThrow = effect.SavingThrow,
 					Skill = effect.Skill,
-					Modifier = effect.Modifier,
-					Description = effect.Description
+					Modifier = effect.Modifier
 				});
 			}
 

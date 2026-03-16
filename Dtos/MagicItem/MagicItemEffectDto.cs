@@ -5,6 +5,8 @@ namespace Whizsheet.Api.Dtos.MagicItem
 {
 	public class MagicItemEffectDto
 	{
+		public Guid Id { get; set; }
+
 		public ItemEffectType? EffectType { get; set; }
 
 		public AbilityScoreType? AbilityScore { get; set; }
@@ -14,7 +16,5 @@ namespace Whizsheet.Api.Dtos.MagicItem
 		public SkillType? Skill { get; set; }
 
 		public int Modifier { get; set; }
-
-		public string Description { get; set; } = string.Empty;
 	}
 }
