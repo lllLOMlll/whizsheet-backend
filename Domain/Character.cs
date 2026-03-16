@@ -49,10 +49,7 @@ namespace Whizsheet.Api.Domain
 		public List<SavingThrow> SavingThrows { get; set; } = new();
 
 		// ITEMS
-		public List<CharacterItem> Items { get; set; } = new();
-
-
-
+		public List<Item> Items { get; set; } = new();
 
 
 

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Whizsheet.Api.Infrastructure;
 
@@ -11,9 +12,11 @@ using Whizsheet.Api.Infrastructure;
 namespace Whizsheet.Api.Migrations
 {
     [DbContext(typeof(WhizsheetDbContext))]
-    partial class WhizsheetDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260316115310_RefactorItems")]
+    partial class RefactorItems
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

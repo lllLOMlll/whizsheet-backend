@@ -20,7 +20,6 @@ namespace Whizsheet.Api.Infrastructure
 		public DbSet<HitDicePool> HitDicePools => Set<HitDicePool>();
 		public DbSet<Skill> Skills => Set<Skill>();
 		public DbSet<SavingThrow> SavingThrows => Set<SavingThrow>();
-		public DbSet<CharacterItem> CharacterItems => Set<CharacterItem>();
 		public DbSet<Item> Items => Set<Item>();
 		public DbSet<Weapon> Weapons => Set<Weapon>();
 		public DbSet<MagicItem> MagicItems => Set<MagicItem>();
@@ -109,15 +108,25 @@ namespace Whizsheet.Api.Infrastructure
 				.IsRequired();
 
 			builder.Entity<Character>()
-				.HasMany<CharacterItem>()
-				.WithOne(ci => ci.Character)
-				.HasForeignKey(ci => ci.CharacterId)
+				.HasMany(c => c.Items)
+				.WithOne(i => i.Character)
+				.HasForeignKey(i => i.CharacterId)
 				.OnDelete(DeleteBehavior.Cascade);
 
-			builder.Entity<CharacterItem>()
-				.HasOne(ci => ci.Item)
-				.WithMany()
-				.HasForeignKey(ci => ci.ItemId)
+			builder.Entity<Item>()
+				.HasDiscriminator<string>("ItemType")
+				.HasValue<Weapon>("Weapon");
+
+			builder.Entity<Item>()
+				.HasOne(i => i.MagicItem)
+				.WithOne(m => m.Item)
+				.HasForeignKey<MagicItem>(m => m.ItemId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			builder.Entity<MagicItem>()
+				.HasMany(m => m.MagicItemEffects)
+				.WithOne(e => e.MagicItem)
+				.HasForeignKey(e => e.MagicItemId)
 				.OnDelete(DeleteBehavior.Cascade);
 
 
