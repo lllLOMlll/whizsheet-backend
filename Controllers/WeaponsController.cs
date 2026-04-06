@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Whizsheet.Api.Domain;
 using Whizsheet.Api.Domain.Items;
 using Whizsheet.Api.Dtos.MagicItem;
 using Whizsheet.Api.Dtos.Weapon;
@@ -181,6 +182,56 @@ namespace Whizsheet.Api.Controllers
 			var weaponDto = ConvertWeaponToDto(weapon);
 
 			return Ok(weaponDto);
+		}
+
+		[HttpDelete("{weaponId:guid}")]
+		public async Task<IActionResult> Delete(int characterId, Guid weaponId)
+		{
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+			if (userId == null)
+				return Unauthorized();
+
+			var weapon = await _db.Weapons
+				.FirstOrDefaultAsync(w =>
+					w.Id == weaponId &&
+					w.CharacterId == characterId &&
+					w.Character.UserId == userId);
+
+			if (weapon == null)
+				return NotFound();
+
+
+			_db.Weapons.Remove(weapon);
+
+			await _db.SaveChangesAsync();
+
+			return NoContent();
+		}
+
+
+		[HttpPatch("{weaponId:guid}/equip")]
+		public async Task<IActionResult> ToggleEquip(int characterId, Guid weaponId)
+		{
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+			if (userId == null)
+				return Unauthorized();
+
+			var weapon = await _db.Weapons
+					.FirstOrDefaultAsync(w =>
+						w.Id == weaponId &&
+						w.CharacterId == characterId &&
+						w.Character.UserId == userId);
+
+			if (weapon == null)
+				return NotFound();
+
+			weapon.IsEquipped = !weapon.IsEquipped;
+
+			await _db.SaveChangesAsync();
+
+			return Ok(new { weaponId, weapon.IsEquipped });
 		}
 
 		private WeaponDto ConvertWeaponToDto(Weapon weapon)

@@ -38,17 +38,17 @@ namespace Whizsheet.Api.Controllers
 				{
 					Id = c.Id,
 					Name = c.Name,
-					TotalHitPoints = c.HitPoints.TotalHitPoints,			
+					TotalHitPoints = c.HitPoints.TotalHitPoints,
 					CharacterClass = c.Classes
 						.OrderByDescending(cc => cc.Level)
 						.Select(cc => new CharacterClassDto
-					{
-						Id = cc.Id,
-						ClassType = cc.ClassType,
-						CustomClassName = cc.CustomClassName,
-						Level = cc.Level,
-						DisplayName = cc.DisplayName
-					}).ToList() 
+						{
+							Id = cc.Id,
+							ClassType = cc.ClassType,
+							CustomClassName = cc.CustomClassName,
+							Level = cc.Level,
+							DisplayName = cc.DisplayName
+						}).ToList()
 				})
 				.ToListAsync();
 
@@ -59,7 +59,7 @@ namespace Whizsheet.Api.Controllers
 		public async Task<IActionResult> Create(CreateCharacterDto dto)
 		{
 			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-			
+
 			if (userId == null)
 			{
 				return Unauthorized();
@@ -85,9 +85,9 @@ namespace Whizsheet.Api.Controllers
 			var result = new CharacterDto
 			{
 				Id = character.Id,
-				Name = character.Name,		
+				Name = character.Name,
 			};
-		
+
 			return CreatedAtAction(
 				nameof(GetById),
 				new { id = character.Id },
@@ -95,51 +95,51 @@ namespace Whizsheet.Api.Controllers
 			);
 		}
 
-			[HttpDelete("{id:int}")]
-			public async Task<IActionResult> Delete(int id)
-			{
-				var character = await _db.Characters.FindAsync(id);
+		[HttpDelete("{id:int}")]
+		public async Task<IActionResult> Delete(int id)
+		{
+			var character = await _db.Characters.FindAsync(id);
 
-				if (character == null)
-					return NotFound();
+			if (character == null)
+				return NotFound();
 
-				_db.Characters.Remove(character);
-				await _db.SaveChangesAsync();
+			_db.Characters.Remove(character);
+			await _db.SaveChangesAsync();
 
-				return NoContent(); // 204
-			}
-
-			[HttpGet("{id:int}")]
-			public async Task<IActionResult> GetById(int id)
-			{
-				var character = await _db.Characters.FindAsync(id);
-
-				if (character is null)
-					return NotFound();
-
-				var dto = new CharacterDto
-				{
-					Id = character.Id,
-					Name = character.Name,			
-				};
-
-				return Ok(dto);
-			}
-
-			[HttpPut("{id:int}")]
-			public async Task<IActionResult> Update(int id, UpdateCharacterDto dto)
-			{
-				var character = await _db.Characters.FindAsync(id);
-
-				if (character is null)
-					return NotFound();
-
-				character.Name = dto.Name;		
-
-				await _db.SaveChangesAsync();
-
-				return NoContent(); // 204
-			}
-
+			return NoContent(); // 204
 		}
+
+		[HttpGet("{id:int}")]
+		public async Task<IActionResult> GetById(int id)
+		{
+			var character = await _db.Characters.FindAsync(id);
+
+			if (character is null)
+				return NotFound();
+
+			var dto = new CharacterDto
+			{
+				Id = character.Id,
+				Name = character.Name,
+			};
+
+			return Ok(dto);
+		}
+
+		[HttpPut("{id:int}")]
+		public async Task<IActionResult> Update(int id, UpdateCharacterDto dto)
+		{
+			var character = await _db.Characters.FindAsync(id);
+
+			if (character is null)
+				return NotFound();
+
+			character.Name = dto.Name;
+
+			await _db.SaveChangesAsync();
+
+			return NoContent(); // 204
+		}
+
 	}
+}
