@@ -435,14 +435,29 @@ namespace Whizsheet.Api.Domain
 		//************* WEAPONS ************************
 		public int GetDamageModifier(Weapon weapon)
 		{
+			int damageModifier = 0;
+			int attackRollBonus = 0;
+
 			if (weapon == null) return 0;
 
 			if (weapon.IsFinesse || weapon.AttackType == AttackType.Range)
 			{
-				return AbilityScores.DexterityModifier;
+				damageModifier +=  AbilityScores.DexterityModifier;
+			}
+			else
+			{
+				damageModifier += AbilityScores.StrengthModifier;
 			}
 
-			return AbilityScores.StrengthModifier;
+			if (weapon.BonusAttackRollType != null)
+			{
+				// ?? -> if null
+				// BonusAttackRollType.None = 0
+				attackRollBonus = (int)(weapon.BonusAttackRollType ?? BonusAttackRollType.None);
+			}
+
+			return damageModifier + attackRollBonus;
+
 		}
 
 		public int GetAttackBonus(Weapon weapon)
@@ -455,11 +470,11 @@ namespace Whizsheet.Api.Domain
 			// Using Dexterity modifier or Strenth modifier
 			if (weapon.IsFinesse || weapon.AttackType == AttackType.Range)
 			{
-				attackBonus = AbilityScores.DexterityModifier + ProficiencyBonus;
+				attackBonus += AbilityScores.DexterityModifier;
 			}
 			else
 			{
-				attackBonus = AbilityScores.StrengthModifier + ProficiencyBonus;
+				attackBonus += AbilityScores.StrengthModifier;
 			}
 
 			if (weapon.BonusAttackRollType != null)
@@ -469,7 +484,7 @@ namespace Whizsheet.Api.Domain
 				attackRollBonus = (int)(weapon.BonusAttackRollType ?? BonusAttackRollType.None);
 			}
 
-			return attackBonus + attackRollBonus;
+			return attackBonus + attackRollBonus + ProficiencyBonus;
 		}
 
 	}
