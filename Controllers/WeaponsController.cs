@@ -111,6 +111,8 @@ namespace Whizsheet.Api.Controllers
 			var result = await _db.Set<Weapon>()
 				.Include(w => w.MagicItem)
 					.ThenInclude(mi => mi.MagicItemEffects)
+				.Include(w => w.Character)
+				.Include(w => w.Character.AbilityScores)
 				.FirstAsync(w => w.Id == weapon.Id);
 
 			var weaponDto = ConvertWeaponToDto(result);
@@ -147,6 +149,8 @@ namespace Whizsheet.Api.Controllers
 				.Where(w =>
 					w.CharacterId == characterId &&
 					w.Character.UserId == userId)
+				.Include(w => w.Character)
+				.Include(w => w.Character.AbilityScores)
 				.ToListAsync();
 
 			var weaponDtos = weapons
@@ -169,6 +173,8 @@ namespace Whizsheet.Api.Controllers
 			var weapon = await _db.Set<Weapon>()
 				.Include(w => w.MagicItem)
 					.ThenInclude(mi => mi.MagicItemEffects)
+				.Include(w => w.Character)
+				.Include(w => w.Character.AbilityScores)
 				.FirstOrDefaultAsync(w =>
 					w.Id == weaponId &&
 					w.CharacterId == characterId &&
@@ -250,7 +256,9 @@ namespace Whizsheet.Api.Controllers
 
 				AttackType = weapon.AttackType,
 				BonusAttackRollType = weapon.BonusAttackRollType,
+				DamageModifier = weapon.Character.GetDamageModifier(weapon),
 				DamageDiceType = weapon.DamageDiceType,
+
 				DamageType = weapon.DamageType,
 				RangeType = weapon.RangeType,
 				IsLight = weapon.IsLight,

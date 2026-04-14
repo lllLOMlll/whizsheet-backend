@@ -3,6 +3,7 @@ using Whizsheet.Api.Domain.Items;
 using Whizsheet.Api.Domain.Extensions;
 using Whizsheet.Api.Dtos.Skills;
 using Whizsheet.Api.Enum;
+using Whizsheet.Api.Enum.Weapon;
 
 namespace Whizsheet.Api.Domain
 {
@@ -430,6 +431,24 @@ namespace Whizsheet.Api.Domain
 			}
 		}
 
+
+		//************* HIT DICES************************
+		public int GetDamageModifier(Weapon weapon)
+		{
+			Console.WriteLine("Before null");
+			if (weapon == null) return 0;
+			Console.WriteLine("After null");
+
+			if (weapon.IsFinesse || weapon.AttackType == AttackType.Range)
+			{
+				Console.WriteLine("Dexterity " + getSavingThrowScore(SavingThrowType.Dexterity));
+				//return getSavingThrowScore(SavingThrowType.Dexterity);
+				return AbilityScores.DexterityModifier;
+			}
+			Console.WriteLine("Strength " + getSavingThrowScore(SavingThrowType.Strength));
+			//return getSavingThrowScore(SavingThrowType.Strength);
+			return AbilityScores.StrengthModifier;
+		}
 
 	}
 }
