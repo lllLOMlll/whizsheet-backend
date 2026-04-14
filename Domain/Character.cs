@@ -79,7 +79,7 @@ namespace Whizsheet.Api.Domain
 			CreateStartingHitPoints(10);
 			CreateStartingAbilityScores(10, 10, 10, 10, 10, 10);
 			CreateStartingSavingThrows();
-			CreateStartingSkills();		
+			CreateStartingSkills();
 		}
 
 		// =========================
@@ -98,7 +98,7 @@ namespace Whizsheet.Api.Domain
 
 		}
 
-		
+
 		//************* HIT POINTS *************
 		public void CreateStartingHitPoints(int totalHp)
 		{
@@ -159,7 +159,7 @@ namespace Whizsheet.Api.Domain
 			}
 
 			var mainCharacterClass = GetCharacterMainClass();
-		
+
 			foreach (SavingThrow s in SavingThrows)
 			{
 				if (CharacterClassTypeExtensions.IsProficientIn(
@@ -168,7 +168,7 @@ namespace Whizsheet.Api.Domain
 				{
 					s.SetProficiency(true);
 				}
-			}	
+			}
 		}
 
 		public CharacterClassType GetCharacterMainClass()
@@ -180,7 +180,7 @@ namespace Whizsheet.Api.Domain
 				.OrderByDescending(c => c.Level)
 				.First()
 				.ClassType;
-			
+
 		}
 
 		public int getStartingStrengthSavingThrowsBonus()
@@ -220,7 +220,7 @@ namespace Whizsheet.Api.Domain
 
 			if (mainCharacterClass == CharacterClassType.Artificer ||
 				mainCharacterClass == CharacterClassType.Barbarian ||
-				mainCharacterClass == CharacterClassType.Fighter ||				
+				mainCharacterClass == CharacterClassType.Fighter ||
 				mainCharacterClass == CharacterClassType.Sorcerer)
 			{
 				return ProficiencyBonus;
@@ -236,7 +236,7 @@ namespace Whizsheet.Api.Domain
 			if (mainCharacterClass == CharacterClassType.Artificer ||
 				mainCharacterClass == CharacterClassType.BloodHunter ||
 				mainCharacterClass == CharacterClassType.Druid ||
-				mainCharacterClass == CharacterClassType.Rogue||
+				mainCharacterClass == CharacterClassType.Rogue ||
 				mainCharacterClass == CharacterClassType.Wizard
 				)
 			{
@@ -251,10 +251,10 @@ namespace Whizsheet.Api.Domain
 			var mainCharacterClass = GetCharacterMainClass();
 
 			if (mainCharacterClass == CharacterClassType.Cleric ||
-				mainCharacterClass == CharacterClassType.Druid||
+				mainCharacterClass == CharacterClassType.Druid ||
 				mainCharacterClass == CharacterClassType.Paladin ||
-				mainCharacterClass == CharacterClassType.Warlock||
-				mainCharacterClass == CharacterClassType.Wizard 
+				mainCharacterClass == CharacterClassType.Warlock ||
+				mainCharacterClass == CharacterClassType.Wizard
 			)
 			{
 				return ProficiencyBonus;
@@ -268,9 +268,9 @@ namespace Whizsheet.Api.Domain
 			var mainCharacterClass = GetCharacterMainClass();
 
 			if (mainCharacterClass == CharacterClassType.Bard ||
-				mainCharacterClass == CharacterClassType.Cleric||
+				mainCharacterClass == CharacterClassType.Cleric ||
 				mainCharacterClass == CharacterClassType.Paladin ||
-				mainCharacterClass == CharacterClassType.Sorcerer||
+				mainCharacterClass == CharacterClassType.Sorcerer ||
 				mainCharacterClass == CharacterClassType.Warlock
 			)
 			{
@@ -286,7 +286,7 @@ namespace Whizsheet.Api.Domain
 			{
 				if (st.SavingThrowType == savingThrowType)
 				{
-					if (st.IsProficient) 
+					if (st.IsProficient)
 						return ProficiencyBonus;
 				}
 
@@ -363,7 +363,7 @@ namespace Whizsheet.Api.Domain
 
 			{
 				Skills.Add(new Skill(type));
-			}	
+			}
 		}
 
 
@@ -432,22 +432,44 @@ namespace Whizsheet.Api.Domain
 		}
 
 
-		//************* HIT DICES************************
+		//************* WEAPONS ************************
 		public int GetDamageModifier(Weapon weapon)
 		{
-			Console.WriteLine("Before null");
 			if (weapon == null) return 0;
-			Console.WriteLine("After null");
 
 			if (weapon.IsFinesse || weapon.AttackType == AttackType.Range)
 			{
-				Console.WriteLine("Dexterity " + getSavingThrowScore(SavingThrowType.Dexterity));
-				//return getSavingThrowScore(SavingThrowType.Dexterity);
 				return AbilityScores.DexterityModifier;
 			}
-			Console.WriteLine("Strength " + getSavingThrowScore(SavingThrowType.Strength));
-			//return getSavingThrowScore(SavingThrowType.Strength);
+
 			return AbilityScores.StrengthModifier;
+		}
+
+		public int GetAttackBonus(Weapon weapon)
+		{
+			int attackBonus = 0;
+			int attackRollBonus = 0;
+
+			if (weapon == null) return 0;
+
+			// Using Dexterity modifier or Strenth modifier
+			if (weapon.IsFinesse || weapon.AttackType == AttackType.Range)
+			{
+				attackBonus = AbilityScores.DexterityModifier + ProficiencyBonus;
+			}
+			else
+			{
+				attackBonus = AbilityScores.StrengthModifier + ProficiencyBonus;
+			}
+
+			if (weapon.BonusAttackRollType != null)
+			{
+				// ?? -> if null
+				// BonusAttackRollType.None = 0
+				attackRollBonus = (int)(weapon.BonusAttackRollType ?? BonusAttackRollType.None);
+			}
+
+			return attackBonus + attackRollBonus;
 		}
 
 	}

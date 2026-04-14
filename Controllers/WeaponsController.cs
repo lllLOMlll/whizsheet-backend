@@ -256,8 +256,9 @@ namespace Whizsheet.Api.Controllers
 
 				AttackType = weapon.AttackType,
 				BonusAttackRollType = weapon.BonusAttackRollType,
-				DamageModifier = weapon.Character.GetDamageModifier(weapon),
+				AttackBonus = weapon.Character.GetAttackBonus(weapon),
 				DamageDiceType = weapon.DamageDiceType,
+				DamageModifier = weapon.Character.GetDamageModifier(weapon),
 
 				DamageType = weapon.DamageType,
 				RangeType = weapon.RangeType,

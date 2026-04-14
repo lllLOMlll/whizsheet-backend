@@ -8,6 +8,7 @@ namespace Whizsheet.Api.Dtos.Weapon
 		public AttackType? AttackType { get; set; }
 
 		public BonusAttackRollType? BonusAttackRollType { get; set; }
+		public int AttackBonus { get; set; }
 
 		public DamageDiceType? DamageDiceType { get; set; }
 		public int DamageModifier { get; set; }
