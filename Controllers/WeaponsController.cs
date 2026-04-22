@@ -215,6 +215,117 @@ namespace Whizsheet.Api.Controllers
 			return NoContent();
 		}
 
+		[HttpPatch("{characterId:guid}")]
+		public async Task<IActionResult> UpdateWeapon(int characterId, [FromBody] WeaponDto dto)
+		{
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+			if (userId == null)
+				return Unauthorized();
+
+			var weapon = await _db.Weapons
+				.Include(w => w.MagicItem)
+					.ThenInclude(mi => mi.MagicItemEffects)
+				.FirstOrDefaultAsync(w =>
+					w.Id == dto.Id &&
+					w.CharacterId == characterId &&
+					w.Character.UserId == userId);
+
+			if (weapon == null)
+				return NotFound();
+
+			// =========================
+			// BASIC PROPERTIES
+			// =========================
+			weapon.Name = dto.Name;
+			weapon.Description = dto.Description;
+			weapon.ItemRarity = dto.ItemRarity;
+			weapon.Value = dto.Value;
+			weapon.Weight = dto.Weight;
+			weapon.IsEquipped = dto.IsEquipped;
+			weapon.IsAttuned = dto.IsAttuned;
+			weapon.Quantity = dto.Quantity;
+
+			weapon.AttackType = dto.AttackType;
+			weapon.BonusAttackRollType = dto.BonusAttackRollType;
+			weapon.DamageDiceType = dto.DamageDiceType;
+			weapon.DamageType = dto.DamageType;
+			weapon.RangeType = dto.RangeType;
+
+			weapon.IsLight = dto.IsLight;
+			weapon.IsFinesse = dto.IsFinesse;
+			weapon.IsThrown = dto.IsThrown;
+			weapon.IsVersatile = dto.IsVersatile;
+			weapon.IsAmmunition = dto.IsAmmunition;
+			weapon.IsHeavy = dto.IsHeavy;
+			weapon.IsReach = dto.IsReach;
+			weapon.IsTwoHanded = dto.IsTwoHanded;
+			weapon.IsLoading = dto.IsLoading;
+			weapon.IsSpecial = dto.IsSpecial;
+
+			// =========================
+			// MAGIC ITEM HANDLING
+			// =========================
+
+			// CASE 1: DTO has NO magic item → DELETE existing
+			if (dto.MagicItem == null)
+			{
+				if (weapon.MagicItem != null)
+				{
+					_db.Remove(weapon.MagicItem);
+					weapon.MagicItem = null;
+				}
+			}
+			else
+			{
+				// CASE 2: CREATE if not exists
+				if (weapon.MagicItem == null)
+				{
+					weapon.MagicItem = new MagicItem
+					{
+						Id = Guid.NewGuid()
+					};
+				}
+
+				// UPDATE
+				var magicItem = weapon.MagicItem;
+
+				magicItem.RequiresAttunement = dto.MagicItem.RequiresAttunement;
+				magicItem.MagicEffectDescription = dto.MagicItem.MagicEffectDescription;
+				magicItem.MagicEffectMechanics = dto.MagicItem.MagicEffectMechanics;
+				magicItem.TotalCharges = dto.MagicItem.TotalCharges;
+				magicItem.ChargesRemaining = dto.MagicItem.ChargesRemaining;
+				magicItem.MagicRechargeRate = dto.MagicItem.MagicRechargeRate;
+
+				// =========================
+				// EFFECTS SYNC (simple & safe)
+				// =========================
+
+				// Remove all existing effects
+				_db.RemoveRange(magicItem.MagicItemEffects);
+
+				magicItem.MagicItemEffects.Clear();
+
+				// Recreate from DTO
+				foreach (var effectDto in dto.MagicItem.Effects)
+				{
+					magicItem.MagicItemEffects.Add(new MagicItemEffect
+					{
+						Id = Guid.NewGuid(),
+						EffectType = effectDto.EffectType,
+						AbilityScore = effectDto.AbilityScore,
+						SavingThrow = effectDto.SavingThrow,
+						Skill = effectDto.Skill,
+						Modifier = effectDto.Modifier
+					});
+				}
+			}
+
+			await _db.SaveChangesAsync();
+
+			return Ok();
+		}
+
 
 		[HttpPatch("{weaponId:guid}/equip")]
 		public async Task<IActionResult> ToggleEquip(int characterId, Guid weaponId)
