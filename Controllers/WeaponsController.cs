@@ -215,8 +215,8 @@ namespace Whizsheet.Api.Controllers
 			return NoContent();
 		}
 
-		[HttpPatch("{characterId:guid}")]
-		public async Task<IActionResult> UpdateWeapon(int characterId, [FromBody] WeaponDto dto)
+		[HttpPatch("{weaponId:guid}")]
+		public async Task<IActionResult> UpdateWeapon(int characterId, Guid weaponId, [FromBody] WeaponDto dto)
 		{
 			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -227,7 +227,7 @@ namespace Whizsheet.Api.Controllers
 				.Include(w => w.MagicItem)
 					.ThenInclude(mi => mi.MagicItemEffects)
 				.FirstOrDefaultAsync(w =>
-					w.Id == dto.Id &&
+					w.Id == weaponId &&
 					w.CharacterId == characterId &&
 					w.Character.UserId == userId);
 
@@ -283,13 +283,14 @@ namespace Whizsheet.Api.Controllers
 				{
 					weapon.MagicItem = new MagicItem
 					{
-						Id = Guid.NewGuid()
+						Id = Guid.NewGuid(),
+						MagicItemEffects = new List<MagicItemEffect>()
 					};
 				}
 
-				// UPDATE
 				var magicItem = weapon.MagicItem;
 
+				// UPDATE MAGIC ITEM
 				magicItem.RequiresAttunement = dto.MagicItem.RequiresAttunement;
 				magicItem.MagicEffectDescription = dto.MagicItem.MagicEffectDescription;
 				magicItem.MagicEffectMechanics = dto.MagicItem.MagicEffectMechanics;
@@ -298,26 +299,51 @@ namespace Whizsheet.Api.Controllers
 				magicItem.MagicRechargeRate = dto.MagicItem.MagicRechargeRate;
 
 				// =========================
-				// EFFECTS SYNC (simple & safe)
+				// EFFECTS SYNC (DIFF INTELLIGENT)
 				// =========================
 
-				// Remove all existing effects
-				_db.RemoveRange(magicItem.MagicItemEffects);
+				var existingEffects = magicItem.MagicItemEffects.ToList();
 
-				magicItem.MagicItemEffects.Clear();
+				// DELETE effects not in DTO
+				foreach (var existing in existingEffects)
+				{
+					var stillExists = dto.MagicItem.Effects
+						.Any(e => e.Id == existing.Id);
 
-				// Recreate from DTO
+					if (!stillExists)
+					{
+						_db.Remove(existing);
+					}
+				}
+
+				// UPDATE + ADD
 				foreach (var effectDto in dto.MagicItem.Effects)
 				{
-					magicItem.MagicItemEffects.Add(new MagicItemEffect
+					var existing = existingEffects
+						.FirstOrDefault(e => e.Id == effectDto.Id);
+
+					if (existing != null)
 					{
-						Id = Guid.NewGuid(),
-						EffectType = effectDto.EffectType,
-						AbilityScore = effectDto.AbilityScore,
-						SavingThrow = effectDto.SavingThrow,
-						Skill = effectDto.Skill,
-						Modifier = effectDto.Modifier
-					});
+						// UPDATE
+						existing.EffectType = effectDto.EffectType;
+						existing.AbilityScore = effectDto.AbilityScore;
+						existing.SavingThrow = effectDto.SavingThrow;
+						existing.Skill = effectDto.Skill;
+						existing.Modifier = effectDto.Modifier;
+					}
+					else
+					{
+						// ADD
+						magicItem.MagicItemEffects.Add(new MagicItemEffect
+						{
+							Id = Guid.NewGuid(),
+							EffectType = effectDto.EffectType,
+							AbilityScore = effectDto.AbilityScore,
+							SavingThrow = effectDto.SavingThrow,
+							Skill = effectDto.Skill,
+							Modifier = effectDto.Modifier
+						});
+					}
 				}
 			}
 
