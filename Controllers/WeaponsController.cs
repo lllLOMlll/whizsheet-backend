@@ -225,7 +225,6 @@ namespace Whizsheet.Api.Controllers
 
 			var weapon = await _db.Weapons
 				.Include(w => w.MagicItem)
-					.ThenInclude(mi => mi.MagicItemEffects)
 				.FirstOrDefaultAsync(w =>
 					w.Id == weaponId &&
 					w.CharacterId == characterId &&
@@ -234,7 +233,10 @@ namespace Whizsheet.Api.Controllers
 			if (weapon == null)
 				return NotFound();
 
-			// Weapon
+			// =========================
+			// UPDATE WEAPON
+			// =========================
+
 			weapon.Name = dto.Name;
 			weapon.Description = dto.Description;
 			weapon.ItemRarity = dto.ItemRarity;
@@ -261,32 +263,34 @@ namespace Whizsheet.Api.Controllers
 			weapon.IsLoading = dto.IsLoading;
 			weapon.IsSpecial = dto.IsSpecial;
 
-		
-			// Magic item
-			// CASE 1: DTO has NO magic item → DELETE existing
+			// =========================
+			// MAGIC ITEM
+			// =========================
+
 			if (dto.MagicItem == null)
 			{
 				if (weapon.MagicItem != null)
 				{
-					_db.Remove(weapon.MagicItem);
+					await _db.MagicItemEffects
+						.Where(e => e.MagicItemId == weapon.MagicItem.Id)
+						.ExecuteDeleteAsync();
+
+					_db.MagicItems.Remove(weapon.MagicItem);
 					weapon.MagicItem = null;
 				}
 			}
 			else
 			{
-				// CASE 2: CREATE if not exists
 				if (weapon.MagicItem == null)
 				{
 					weapon.MagicItem = new MagicItem
 					{
-						Id = Guid.NewGuid(),
-						MagicItemEffects = new List<MagicItemEffect>()
+						Id = Guid.NewGuid()
 					};
 				}
 
 				var magicItem = weapon.MagicItem;
 
-				// UPDATE MAGIC ITEM
 				magicItem.RequiresAttunement = dto.MagicItem.RequiresAttunement;
 				magicItem.MagicEffectDescription = dto.MagicItem.MagicEffectDescription;
 				magicItem.MagicEffectMechanics = dto.MagicItem.MagicEffectMechanics;
@@ -294,45 +298,31 @@ namespace Whizsheet.Api.Controllers
 				magicItem.ChargesRemaining = dto.MagicItem.ChargesRemaining;
 				magicItem.MagicRechargeRate = dto.MagicItem.MagicRechargeRate;
 
-				// =========================
-				// EFFECTS SYNC (DIFF INTELLIGENT)
-				// =========================
+				// 🔥 CRUCIAL : detach old tracked effects
+				var trackedEffects = _db.ChangeTracker
+					.Entries<MagicItemEffect>()
+					.Where(e => e.Entity.MagicItemId == magicItem.Id)
+					.ToList();
 
-				var existingEffects = magicItem.MagicItemEffects.ToList();
-
-				// DELETE effects not in DTO
-				foreach (var existing in existingEffects)
+				foreach (var entry in trackedEffects)
 				{
-					var stillExists = dto.MagicItem.Effects
-						.Any(e => e.Id == existing.Id);
-
-					if (!stillExists)
-					{
-						_db.Remove(existing);
-					}
+					entry.State = EntityState.Detached;
 				}
 
-				// UPDATE + ADD
-				foreach (var effectDto in dto.MagicItem.Effects)
-				{
-					var existing = existingEffects
-						.FirstOrDefault(e => e.Id == effectDto.Id);
+				// DELETE ALL IN DB
+				await _db.MagicItemEffects
+					.Where(e => e.MagicItemId == magicItem.Id)
+					.ExecuteDeleteAsync();
 
-					if (existing != null)
+				// ADD NEW
+				if (dto.MagicItem.Effects != null)
+				{
+					foreach (var effectDto in dto.MagicItem.Effects)
 					{
-						// UPDATE
-						existing.EffectType = effectDto.EffectType;
-						existing.AbilityScore = effectDto.AbilityScore;
-						existing.SavingThrow = effectDto.SavingThrow;
-						existing.Skill = effectDto.Skill;
-						existing.Modifier = effectDto.Modifier;
-					}
-					else
-					{
-						// ADD
-						magicItem.MagicItemEffects.Add(new MagicItemEffect
+						_db.MagicItemEffects.Add(new MagicItemEffect
 						{
 							Id = Guid.NewGuid(),
+							MagicItemId = magicItem.Id,
 							EffectType = effectDto.EffectType,
 							AbilityScore = effectDto.AbilityScore,
 							SavingThrow = effectDto.SavingThrow,
@@ -347,6 +337,7 @@ namespace Whizsheet.Api.Controllers
 
 			return Ok();
 		}
+
 
 
 		[HttpPatch("{weaponId:guid}/equip")]
