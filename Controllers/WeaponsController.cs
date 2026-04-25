@@ -234,9 +234,7 @@ namespace Whizsheet.Api.Controllers
 			if (weapon == null)
 				return NotFound();
 
-			// =========================
-			// BASIC PROPERTIES
-			// =========================
+			// Weapon
 			weapon.Name = dto.Name;
 			weapon.Description = dto.Description;
 			weapon.ItemRarity = dto.ItemRarity;
@@ -263,10 +261,8 @@ namespace Whizsheet.Api.Controllers
 			weapon.IsLoading = dto.IsLoading;
 			weapon.IsSpecial = dto.IsSpecial;
 
-			// =========================
-			// MAGIC ITEM HANDLING
-			// =========================
-
+		
+			// Magic item
 			// CASE 1: DTO has NO magic item → DELETE existing
 			if (dto.MagicItem == null)
 			{
