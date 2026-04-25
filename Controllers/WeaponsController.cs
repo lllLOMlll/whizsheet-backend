@@ -298,7 +298,7 @@ namespace Whizsheet.Api.Controllers
 				magicItem.ChargesRemaining = dto.MagicItem.ChargesRemaining;
 				magicItem.MagicRechargeRate = dto.MagicItem.MagicRechargeRate;
 
-				// 🔥 CRUCIAL : detach old tracked effects
+				// Detach old tracked effects
 				var trackedEffects = _db.ChangeTracker
 					.Entries<MagicItemEffect>()
 					.Where(e => e.Entity.MagicItemId == magicItem.Id)
