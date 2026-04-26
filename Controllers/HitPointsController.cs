@@ -80,6 +80,9 @@ namespace Whizsheet.Api.Controllers
 
 			var character = await _dbContext.Characters
 				.Include(c => c.HitPoints)
+				.Include(c => c.Items)
+					.ThenInclude(i => i.MagicItem)
+						.ThenInclude(m => m.MagicItemEffects)
 				.FirstOrDefaultAsync(c =>
 					c.Id == characterId &&
 					c.UserId == userId);
@@ -91,7 +94,7 @@ namespace Whizsheet.Api.Controllers
 
 			var characterHitPoints = new HitPointsDto
 			{
-				TotalHitPoints = character.HitPoints.TotalHitPoints,
+				TotalHitPoints = character.HitPoints.TotalHitPoints + character.GetHpBonus(),
 				CurrentHitPoints = character.HitPoints.CurrentHitPoints,
 				TemporaryHitPoints = character.HitPoints.TemporaryHitPoints
 			};

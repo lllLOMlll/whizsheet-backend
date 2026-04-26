@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using Whizsheet.Api.Domain.Items;
 using Whizsheet.Api.Domain.Extensions;
+using Whizsheet.Api.Domain.Items;
 using Whizsheet.Api.Dtos.Skills;
 using Whizsheet.Api.Enum;
+using Whizsheet.Api.Enum.Item;
 using Whizsheet.Api.Enum.Weapon;
 
 namespace Whizsheet.Api.Domain
@@ -86,7 +87,7 @@ namespace Whizsheet.Api.Domain
 		// FACTORY METHODS
 		// =========================
 
-		//************* HIT POINTS *************
+		//************* STARTING CLASS *************
 		public void CreateStartingClass(string startingClass)
 		{
 			if (Classes.Any())
@@ -451,8 +452,6 @@ namespace Whizsheet.Api.Domain
 
 			if (weapon.BonusAttackRollType != null)
 			{
-				// ?? -> if null
-				// BonusAttackRollType.None = 0
 				attackRollBonus = (int)(weapon.BonusAttackRollType ?? BonusAttackRollType.None);
 			}
 
@@ -487,6 +486,27 @@ namespace Whizsheet.Api.Domain
 			return attackBonus + attackRollBonus + ProficiencyBonus;
 		}
 
+
+
+		//************* MAGIC ITEM BONUS ************************
+		public int GetHpBonus()
+		{
+			int bonusHp = 0;
+			foreach (Item i in Items)
+			{
+				if (i.IsEquipped && i.MagicItem != null && i.MagicItem.MagicItemEffects != null)
+				{
+					foreach (MagicItemEffect effect in i.MagicItem.MagicItemEffects)
+					{
+						if (effect.EffectType == ItemEffectType.HitPoints)
+						{
+							bonusHp += effect.Modifier;
+						}
+					}
+				}
+			}
+			return bonusHp;
+		}
 	}
 }
 
