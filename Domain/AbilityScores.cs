@@ -8,7 +8,7 @@ namespace Whizsheet.Api.Domain
 		public int Id { get; set; }
 		
 		public int Strength { get; set; }
-		public int StrengthModifier => (int)Math.Floor((Strength - 10) / 2.0);
+		public int StrengthModifier => (int)Math.Floor((Strength - 10) / 2.0) + Character.GetMagicItemBonusAbilityScore(AbilityScoreType.Strength);
 		public int StrengthSavingThrowsModifier =>
 			StrengthModifier + Character.getSavingThrowBonus(SavingThrowType.Strength);
 		public int Dexterity { get; set; }

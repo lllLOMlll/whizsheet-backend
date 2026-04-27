@@ -489,14 +489,15 @@ namespace Whizsheet.Api.Domain
 
 
 		//************* MAGIC ITEM BONUS ************************
-		public int GetHpBonus()
+		public int GetMagicItemBonusHp()
 		{
 			int bonusHp = 0;
-			foreach (Item i in Items)
+
+			foreach (Item item in Items)
 			{
-				if (i.IsEquipped && i.MagicItem != null && i.MagicItem.MagicItemEffects != null)
+				if (item.IsEquipped && item.MagicItem != null && item.MagicItem.MagicItemEffects != null)
 				{
-					foreach (MagicItemEffect effect in i.MagicItem.MagicItemEffects)
+					foreach (MagicItemEffect effect in item.MagicItem.MagicItemEffects)
 					{
 						if (effect.EffectType == ItemEffectType.HitPoints)
 						{
@@ -506,6 +507,29 @@ namespace Whizsheet.Api.Domain
 				}
 			}
 			return bonusHp;
+		}
+
+		public int GetMagicItemBonusAbilityScore(AbilityScoreType abilityScoreType)
+		{
+			int abilityScorebonus = 0;
+			
+			foreach (Item item in Items)
+			{
+				if (item.IsEquipped && item.MagicItem != null && item.MagicItem.MagicItemEffects != null)
+				{
+					foreach (MagicItemEffect effect in item.MagicItem.MagicItemEffects)
+					{
+						if (effect.EffectType == ItemEffectType.AbilityScore)
+						{
+							if (effect.AbilityScore == abilityScoreType)
+							{
+								abilityScorebonus += effect.Modifier;
+							}
+						}
+					}
+				}
+			}
+			return abilityScorebonus;
 		}
 	}
 }
