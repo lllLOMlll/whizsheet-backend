@@ -94,7 +94,7 @@ namespace Whizsheet.Api.Controllers
 
 			var characterHitPoints = new HitPointsDto
 			{
-				TotalHitPoints = character.HitPoints.TotalHitPoints + character.GetMagicItemBonusHp(),
+				TotalHitPoints = character.HitPoints.TotalHitPoints + character.GetMagicItemHpBonus(),
 				CurrentHitPoints = character.HitPoints.CurrentHitPoints,
 				TemporaryHitPoints = character.HitPoints.TemporaryHitPoints
 			};

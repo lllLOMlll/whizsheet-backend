@@ -474,6 +474,7 @@ namespace Whizsheet.Api.Domain
 			else
 			{
 				attackBonus += AbilityScores.StrengthModifier;
+				//(int)Math.Floor((Strength - 10) / 2.0) + Character.GetMagicItemBonusAbilityScore(AbilityScoreType.Strength)
 			}
 
 			if (weapon.BonusAttackRollType != null)
@@ -489,7 +490,7 @@ namespace Whizsheet.Api.Domain
 
 
 		//************* MAGIC ITEM BONUS ************************
-		public int GetMagicItemBonusHp()
+		public int GetMagicItemHpBonus()
 		{
 			int bonusHp = 0;
 
@@ -509,9 +510,9 @@ namespace Whizsheet.Api.Domain
 			return bonusHp;
 		}
 
-		public int GetMagicItemBonusAbilityScore(AbilityScoreType abilityScoreType)
+		public int GetMagicItemAbilityScoreBonus(AbilityScoreType abilityScoreType)
 		{
-			int abilityScorebonus = 0;
+			int abilityScoreBonus = 0;
 			
 			foreach (Item item in Items)
 			{
@@ -523,13 +524,36 @@ namespace Whizsheet.Api.Domain
 						{
 							if (effect.AbilityScore == abilityScoreType)
 							{
-								abilityScorebonus += effect.Modifier;
+								abilityScoreBonus += effect.Modifier;
 							}
 						}
 					}
 				}
 			}
-			return abilityScorebonus;
+			return abilityScoreBonus;
+		}
+
+		public int GetMagicItemSavingThrowBonus(SavingThrowType savingThrowType)
+		{
+			int savingThrowBonus = 0;
+
+			foreach (Item item in Items)
+			{
+				if (item.IsEquipped && item.MagicItem != null && item.MagicItem.MagicItemEffects != null)
+				{
+					foreach (MagicItemEffect effect in item.MagicItem.MagicItemEffects)
+					{
+						if (effect.EffectType == ItemEffectType.SavingThrow)
+						{
+							if (effect.SavingThrow == savingThrowType)
+							{
+								savingThrowBonus += effect.Modifier;
+							}
+						}
+					}
+				}
+			}
+			return savingThrowBonus;
 		}
 	}
 }

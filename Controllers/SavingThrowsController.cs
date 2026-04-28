@@ -36,6 +36,9 @@ namespace Whizsheet.Api.Controllers
 				.Include(c => c.SavingThrows)
 				.Include(c => c.AbilityScores)
 				.Include(c => c.Classes)
+				.Include(c => c.Items)
+					.ThenInclude(mi => mi.MagicItem)
+						.ThenInclude(me => me.MagicItemEffects)
 				.FirstOrDefaultAsync(c =>
 					c.UserId == userId &&
 					c.Id == characterId);
@@ -51,11 +54,44 @@ namespace Whizsheet.Api.Controllers
 				{
 					SavingThrowType = st.SavingThrowType,
 					IsProficient = st.IsProficient,
-					Modifier = character.getSavingThrowScore(st.SavingThrowType),
+					Modifier = st.SavingThrowType switch
+					{
+						SavingThrowType.Strength =>
+							(int)Math.Floor(((character.AbilityScores.Strength
+								+ character.GetMagicItemAbilityScoreBonus(AbilityScoreType.Strength)) - 10) / 2.0)
+							+ character.GetMagicItemSavingThrowBonus(st.SavingThrowType),
+
+						SavingThrowType.Dexterity =>
+							(int)Math.Floor(((character.AbilityScores.Dexterity
+								+ character.GetMagicItemAbilityScoreBonus(AbilityScoreType.Dexterity)) - 10) / 2.0)
+							+ character.GetMagicItemSavingThrowBonus(st.SavingThrowType),
+
+						SavingThrowType.Constitution =>
+							(int)Math.Floor(((character.AbilityScores.Constitution
+								+ character.GetMagicItemAbilityScoreBonus(AbilityScoreType.Constitution)) - 10) / 2.0)
+							+ character.GetMagicItemSavingThrowBonus(st.SavingThrowType),
+
+						SavingThrowType.Intelligence =>
+							(int)Math.Floor(((character.AbilityScores.Intelligence
+								+ character.GetMagicItemAbilityScoreBonus(AbilityScoreType.Intelligence)) - 10) / 2.0)
+							+ character.GetMagicItemSavingThrowBonus(st.SavingThrowType),
+
+						SavingThrowType.Wisdom =>
+							(int)Math.Floor(((character.AbilityScores.Wisdom
+								+ character.GetMagicItemAbilityScoreBonus(AbilityScoreType.Wisdom)) - 10) / 2.0)
+							+ character.GetMagicItemSavingThrowBonus(st.SavingThrowType),
+
+						SavingThrowType.Charisma =>
+							(int)Math.Floor(((character.AbilityScores.Charisma
+								+ character.GetMagicItemAbilityScoreBonus(AbilityScoreType.Charisma)) - 10) / 2.0)
+							+ character.GetMagicItemSavingThrowBonus(st.SavingThrowType),
+
+						_ => 0
+					}
 				}).ToList()
 			};
 
-
+			Console.WriteLine("Strength Saving Throw Magic = " + character.GetMagicItemSavingThrowBonus(SavingThrowType.Strength));
 			return Ok(savingThrowsDto);
 		}
 

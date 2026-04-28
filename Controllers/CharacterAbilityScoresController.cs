@@ -111,44 +111,52 @@ namespace Whizsheet.Api.Controllers
 
 			var characterMainClass = character.GetCharacterMainClass();
 
+			// Ability Scores Modifiers
+			int strengthModifier = (int)Math.Floor(((character.AbilityScores.Strength + character.GetMagicItemAbilityScoreBonus(AbilityScoreType.Strength)) - 10) / 2.0);
+			int dexterityModifier = (int)Math.Floor(((character.AbilityScores.Dexterity + character.GetMagicItemAbilityScoreBonus(AbilityScoreType.Dexterity)) - 10) / 2.0);
+			int constitutionModifier = (int)Math.Floor(((character.AbilityScores.Constitution + character.GetMagicItemAbilityScoreBonus(AbilityScoreType.Constitution)) - 10) / 2.0);
+			int intelligenceModifer = (int)Math.Floor(((character.AbilityScores.Intelligence + character.GetMagicItemAbilityScoreBonus(AbilityScoreType.Intelligence)) - 10) / 2.0);
+			int wisdomModifier = (int)Math.Floor(((character.AbilityScores.Wisdom + character.GetMagicItemAbilityScoreBonus(AbilityScoreType.Wisdom)) - 10) / 2.0);
+			int charismaModifier = (int)Math.Floor(((character.AbilityScores.Charisma + character.GetMagicItemAbilityScoreBonus(AbilityScoreType.Charisma)) - 10) / 2.0);
+
 			var response = new AbilityUpdateResponseDto
 			{
 				Abilities = new UpdateAbilityScoresDto
 				{
-					Strength = character.AbilityScores.Strength + character.GetMagicItemBonusAbilityScore(AbilityScoreType.Strength),
-					StrengthModifier = (int)Math.Floor(((character.AbilityScores.Strength + character.GetMagicItemBonusAbilityScore(AbilityScoreType.Strength)) - 10) / 2.0),
-					Dexterity = character.AbilityScores.Dexterity + character.GetMagicItemBonusAbilityScore(AbilityScoreType.Dexterity),
-					DexterityModifier = (int)Math.Floor(((character.AbilityScores.Dexterity + character.GetMagicItemBonusAbilityScore(AbilityScoreType.Dexterity)) -10) /2.0),
-					Constitution = character.AbilityScores.Constitution + character.GetMagicItemBonusAbilityScore(AbilityScoreType.Constitution),
-					ConstitutionModifier = (int)Math.Floor(((character.AbilityScores.Constitution + character.GetMagicItemBonusAbilityScore(AbilityScoreType.Constitution)) - 10) / 2.0),
-					Intelligence = character.AbilityScores.Intelligence + character.GetMagicItemBonusAbilityScore(AbilityScoreType.Intelligence),
-					IntelligenceModifer = (int)Math.Floor(((character.AbilityScores.Intelligence + character.GetMagicItemBonusAbilityScore(AbilityScoreType.Intelligence)) - 10) / 2.0),
-					Wisdom = character.AbilityScores.Wisdom + character.GetMagicItemBonusAbilityScore(AbilityScoreType.Wisdom),
-					WisdomModifier = (int)Math.Floor(((character.AbilityScores.Wisdom + character.GetMagicItemBonusAbilityScore(AbilityScoreType.Wisdom)) - 10) / 2.0),
-					Charisma = character.AbilityScores.Charisma + character.GetMagicItemBonusAbilityScore(AbilityScoreType.Charisma),
-					CharismaModifier = (int)Math.Floor(((character.AbilityScores.Charisma + character.GetMagicItemBonusAbilityScore(AbilityScoreType.Charisma)) - 10) / 2.0),
+					Strength = character.AbilityScores.Strength + character.GetMagicItemAbilityScoreBonus(AbilityScoreType.Strength),
+					StrengthModifier = strengthModifier,
+					Dexterity = character.AbilityScores.Dexterity + character.GetMagicItemAbilityScoreBonus(AbilityScoreType.Dexterity),
+					DexterityModifier = dexterityModifier,
+					Constitution = character.AbilityScores.Constitution + character.GetMagicItemAbilityScoreBonus(AbilityScoreType.Constitution),
+					ConstitutionModifier = constitutionModifier,
+					Intelligence = character.AbilityScores.Intelligence + character.GetMagicItemAbilityScoreBonus(AbilityScoreType.Intelligence),
+					IntelligenceModifer = intelligenceModifer,
+					Wisdom = character.AbilityScores.Wisdom + character.GetMagicItemAbilityScoreBonus(AbilityScoreType.Wisdom),
+					WisdomModifier = wisdomModifier,
+					Charisma = character.AbilityScores.Charisma + character.GetMagicItemAbilityScoreBonus(AbilityScoreType.Charisma),
+					CharismaModifier = charismaModifier,
 				},
 
 				SavingThrows = new SavingThrowsDto
 				{
-					Strength = character.AbilityScores.StrengthSavingThrowsModifier,
+					Strength = strengthModifier + character.GetMagicItemSavingThrowBonus(SavingThrowType.Strength),
 					IsStrengthProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Strength),
-					Dexterity = character.AbilityScores.DexteritySavingThrowsModifier,
+					Dexterity = dexterityModifier + character.GetMagicItemSavingThrowBonus(SavingThrowType.Dexterity),
 					IsDexterityProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Dexterity),
-					Constitution = character.AbilityScores.ConstitutionSavingThrowsModifier,
+					Constitution = constitutionModifier + character.GetMagicItemSavingThrowBonus(SavingThrowType.Constitution),
 					IsConstitutionProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Constitution),
-					Intelligence = character.AbilityScores.IntelligenceSavingThrowsModifier,
+					Intelligence = intelligenceModifer + character.GetMagicItemSavingThrowBonus(SavingThrowType.Intelligence),
 					IsIntelligenceProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Intelligence),
-					Wisdom = character.AbilityScores.WisdomSavingThrowsModifier,
+					Wisdom = wisdomModifier + character.GetMagicItemSavingThrowBonus(SavingThrowType.Wisdom),
 					IsWisdomProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Wisdom),
-					Charisma = character.AbilityScores.CharismaSavingThrowsModifier,
+					Charisma = charismaModifier + character.GetMagicItemSavingThrowBonus(SavingThrowType.Charisma),
 					IsCharismaProficient = CharacterClassTypeExtensions.IsProficientIn(characterMainClass, SavingThrowType.Charisma)
 				},
 
 				Skills = character.ToSkillsDto().Skills
 
 			};
-
+			
 
 			return Ok(response);
 		}
