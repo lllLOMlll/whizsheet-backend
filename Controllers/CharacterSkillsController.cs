@@ -21,38 +21,6 @@ namespace Whizsheet.Api.Controllers
 			_dbContext = db;
 		}
 
-		//[HttpPost]
-		//public async Task<IActionResult> Create(int characterId)
-		//{
-		//	var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-		//	if (userId == null)
-		//		return Unauthorized();
-
-		//	var character = await _dbContext.Characters
-		//		.Include(c => c.Skills)
-		//		.Include(c => c.AbilityScores)
-		//		.FirstOrDefaultAsync(c =>
-		//			c.Id == characterId &&
-		//			c.UserId == userId
-		//		);
-
-		//	if (character == null)
-		//		return NotFound("Character not found");
-
-		//	if (character.Skills.Any())
-		//		return BadRequest("Skills already created.");
-
-		//	character.CreateSkills();
-
-		//	await _dbContext.SaveChangesAsync();
-
-		//	return CreatedAtAction(
-		//		nameof(Get),
-		//		new { characterId },
-		//		(character.ToSkillsDto())
-		//	);
-		//}
 
 		[HttpGet]
 		public async Task<IActionResult> Get(int characterId)
@@ -65,6 +33,9 @@ namespace Whizsheet.Api.Controllers
 			var character = await _dbContext.Characters
 				.Include(c => c.Skills)
 				.Include(c => c.AbilityScores)
+				.Include(c => c.Items)
+					.ThenInclude(i => i.MagicItem)
+						.ThenInclude(m => m.MagicItemEffects)
 				.Include(c => c.Classes)
 				.FirstOrDefaultAsync(c =>
 					c.Id == characterId &&

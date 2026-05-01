@@ -142,7 +142,11 @@ namespace Whizsheet.Api.Domain
 				{
 					Type = s.Type,
 					IsProficient = s.IsProficient,
-					Modifier = this.GetSkillModifier(s.Type)
+					//Modifier = this.GetSkillModifier(s.Type)
+					Modifier = s.Type switch
+					{
+						this.GetSkillModifier(s.Type) + GetMagicItemAbilityScoreBonus(AbilityScoreType.Strength)
+					}
 				}).ToList()
 			};
 		}
@@ -554,6 +558,27 @@ namespace Whizsheet.Api.Domain
 				}
 			}
 			return savingThrowBonus;
+		}
+
+		public int GetMagicItemSKillBonus(SkillType skillType)
+		{
+			int skillBonus = 0;
+
+			foreach (Item item in Items)
+			{
+				if (item.IsEquipped && item.MagicItem != null && item.MagicItem.MagicItemEffects != null)
+				{
+					foreach (MagicItemEffect effect in item.MagicItem.MagicItemEffects)
+					{
+						if (effect.EffectType == ItemEffectType.Skill)
+							if (effect.Skill == skillType)
+							{
+								skillBonus += effect.Modifier;
+							}
+					}
+				}
+			}
+			return skillBonus;
 		}
 	}
 }
